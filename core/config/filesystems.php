@@ -70,7 +70,9 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        // The web root is the parent of core/, not core/public/ (which does not exist).
+        // The symlink must live at <web-root>/storage so that APP_URL/storage/… URLs resolve.
+        base_path('../storage') => storage_path('app/public'),
     ],
 
 ];

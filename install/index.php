@@ -168,6 +168,49 @@
             $response['message'] = 'Installer was unable to set the admin credentials.';
         }
     }
+
+    if (isset($response['error']) && $response['error'] == 'ok') {
+        // ── 1. Create the storage symlink ──────────────────────────────────────
+        // The web root is the parent of the install/ directory (i.e. parent of __DIR__).
+        // We need <web-root>/storage  →  <web-root>/core/storage/app/public
+        $rootDir    = dirname(__DIR__);
+        $linkPath   = $rootDir . '/storage';
+        $targetPath = $rootDir . '/core/storage/app/public';
+
+        if (!is_dir($targetPath)) {
+            @mkdir($targetPath, 0775, true);
+        }
+        if (!file_exists($linkPath) && !is_link($linkPath)) {
+            @symlink($targetPath, $linkPath);
+        }
+
+        // ── 2. Warm Laravel caches (best-effort; exec may be disabled on some hosts) ──
+        if (function_exists('exec')) {
+            $phpBin  = PHP_BINARY;
+            $artisan = $rootDir . '/core/artisan';
+            if (file_exists($artisan)) {
+                @exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($artisan) . ' optimize:clear 2>/dev/null');
+                @exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($artisan) . ' config:cache   2>/dev/null');
+                @exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($artisan) . ' route:cache    2>/dev/null');
+                @exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($artisan) . ' view:cache     2>/dev/null');
+            }
+        }
+
+        // ── 3. Self-delete the install/ directory after the response is sent ──
+        $installDir = __DIR__;
+        register_shutdown_function(function () use ($installDir) {
+            $files = array_merge(
+                glob($installDir . '/*')  ?: [],
+                glob($installDir . '/.*') ?: []
+            );
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    @unlink($file);
+                }
+            }
+            @rmdir($installDir);
+        });
+    }
     }
     $sectionTitle = empty($action) ? 'Terms of Use' : $action;
 ?>
@@ -208,7 +251,7 @@
                                         if (isset($response['message']) && $response['message']) {
                                             echo '<h5 class="text-warning mb-3">' . $response['message'] . '</h5>';
                                         }
-                                        echo '<p class="text-danger lead my-5">Please delete the "install" folder from the server after installation.</p>';
+                                        echo '<p class="text-success lead my-3"><i class="fas fa-check-circle"></i> The installer folder has been removed automatically.</p>';
                                         echo '<div class="warning"><a href="' . appUrl() . '" class="theme-button choto">Go to website</a></div>';
                                     } else {
                                         if (isset($response['message']) && $response['message']) {
