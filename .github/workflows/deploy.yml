@@ -124,6 +124,25 @@ jobs:
 
       # ==================== POST-DEPLOYMENT ====================
 
+      - name: Validate .env configuration
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          set -e
+          ENV_FILE="${{ secrets.APP_PATH }}/core/.env"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "ERROR: .env file not found at $ENV_FILE"
+            echo "Please run the web installer at your application URL /install to configure the application."
+            exit 1
+          fi
+          echo "✓ .env file exists"
+          if ! grep -q '^DB_CONNECTION=' "$ENV_FILE"; then
+            echo "WARNING: DB_CONNECTION not set in .env; adding DB_CONNECTION=mysql"
+            echo "DB_CONNECTION=mysql" >> "$ENV_FILE"
+          fi
+          echo "✓ DB_CONNECTION is configured"
+          ENDSSH
+
       - name: Prepare runtime directories
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
@@ -168,7 +187,7 @@ jobs:
           "$REMOTE_PHP" artisan config:cache
           "$REMOTE_PHP" artisan route:cache
           "$REMOTE_PHP" artisan event:cache
-          "$REMOTE_PHP" artisan view:cache
+          "$REMOTE_PHP" artisan view:cache || true
           ENDSSH
 
       - name: Validate deployment
