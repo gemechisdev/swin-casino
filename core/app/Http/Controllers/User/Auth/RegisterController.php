@@ -19,10 +19,6 @@ class RegisterController extends Controller {
 
     use RegistersUsers;
 
-    public function __construct() {
-        parent::__construct();
-    }
-
     public function showRegistrationForm() {
         $pageTitle = "Register";
         Intended::identifyRoute();
