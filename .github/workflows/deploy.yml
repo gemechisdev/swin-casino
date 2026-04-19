@@ -122,6 +122,38 @@ jobs:
             "${rsync_excludes[@]}" \
             ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
 
+          # Seed all default/bundled asset directories that are excluded from the
+          # main rsync (to avoid overwriting admin-uploaded content on updates).
+          # --ignore-existing means files already on the server are never
+          # overwritten, so uploaded images/logos are always preserved.
+          # A single rsync pass covers the entire assets/images/ tree and the
+          # admin profile-images folder, then a second pass covers audio files
+          # (belt-and-suspenders in case audio was previously excluded).
+          # Exclude user-generated-only dirs (no default content in repo) so
+          # they are never accidentally wiped or created empty on the remote.
+          SEED_EXCLUDES=(
+            --exclude='user/'
+            --exclude='verify/'
+            --exclude='withdraw_method/'
+            --exclude='push_notification/'
+          )
+
+          rsync -avz --ignore-existing \
+            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
+            "${SEED_EXCLUDES[@]}" \
+            ./assets/images/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/images/
+
+          rsync -avz --ignore-existing \
+            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
+            ./assets/admin/images/profile/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/admin/images/profile/
+
+          rsync -avz --ignore-existing \
+            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
+            ./assets/audio/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/audio/
+
       # ==================== POST-DEPLOYMENT ====================
 
       - name: Validate .env configuration
