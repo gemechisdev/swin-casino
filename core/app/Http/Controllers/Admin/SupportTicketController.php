@@ -14,7 +14,6 @@ class SupportTicketController extends Controller
 
     public function __construct()
     {
-        parent::__construct();
         $this->userType = 'admin';
         $this->column = 'admin_id';
         $this->user = auth()->guard('admin')->user();
