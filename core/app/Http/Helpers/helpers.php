@@ -18,13 +18,25 @@ use App\Notify\Notify;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Laramin\Utility\VugiChugi;
+
 
 function systemDetails() {
-    $system['name']          = 'xaxino';
+    $system['name']          = config('app.name', env('APP_NAME', 'SWin Casino'));
     $system['version']       = '3.8';
     $system['build_version'] = '5.1.19';
     return $system;
+}
+
+function brandName() {
+    return config('app.brand_name', 'Scoware');
+}
+
+function brandUrl() {
+    return config('app.brand_url', 'https://scoware.com');
+}
+
+function brandEmail() {
+    return config('app.brand_email', 'support@scoware.com');
 }
 
 function slug($string) {
@@ -163,16 +175,7 @@ function osBrowser() {
 }
 
 function getTemplates() {
-    $param['purchasecode'] = env("PURCHASECODE");
-    $requestUri            = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
-    $param['website']      = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '' . $requestUri . ' - ' . env("APP_URL");
-    $url                   = VugiChugi::gttmp() . systemDetails()['name'];
-    $response              = CurlRequest::curlPostContent($url, $param);
-    if ($response) {
-        return $response;
-    } else {
-        return null;
-    }
+    return null;
 }
 
 function getPageSections($arr = false) {

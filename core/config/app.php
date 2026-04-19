@@ -1,6 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Facade;
-require_once('timezone.php');
+$timezoneFile = __DIR__ . '/timezone.php';
+$timezone = file_exists($timezoneFile) ? (require $timezoneFile) : env('APP_TIMEZONE', 'UTC');
+if (empty($timezone)) {
+    $timezone = env('APP_TIMEZONE', 'UTC');
+}
 return [
 
     /*
@@ -123,6 +127,21 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Brand Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These values define the brand identity of the application. They are used
+    | in footers, emails, the admin panel, and throughout the application.
+    | Override any of them in your .env file.
+    |
+    */
+
+    'brand_name'  => env('APP_BRAND_NAME', 'Scoware'),
+    'brand_url'   => env('APP_BRAND_URL', 'https://scoware.com'),
+    'brand_email' => env('APP_BRAND_EMAIL', 'support@scoware.com'),
 
     /*
     |--------------------------------------------------------------------------
