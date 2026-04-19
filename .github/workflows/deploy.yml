@@ -72,7 +72,13 @@ jobs:
 
       - name: Deploy SWin Casino application
         run: |
-          rsync -avz --delete \
+          if [ "${{ secrets.DEPLOY_INSTALLER }}" = "true" ]; then
+            INSTALL_EXCLUDE=""
+          else
+            INSTALL_EXCLUDE="--exclude='install/'"
+          fi
+
+          eval rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no" \
             --exclude='.git*' \
             --exclude='.github*' \
@@ -81,7 +87,7 @@ jobs:
             --exclude='.well-known/' \
             --exclude='.env' \
             --exclude='.env.*' \
-            --exclude='install/' \
+            $INSTALL_EXCLUDE \
             --exclude='storage/' \
             --exclude='sitemap.xml' \
             --exclude='robots.xml' \
