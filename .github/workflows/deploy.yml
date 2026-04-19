@@ -39,6 +39,33 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Validate remote PHP 8.3+ availability
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          set -e
+
+          REMOTE_PHP=""
+          for candidate in php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
+              if [ "$version" = "8.3" ] || [ "$version" = "8.4" ] || [ "$version" = "9.0" ]; then
+                REMOTE_PHP="$candidate"
+                break
+              fi
+            fi
+          done
+
+          if [ -z "$REMOTE_PHP" ]; then
+            echo "ERROR: No PHP 8.3+ CLI binary found on server."
+            echo "Install/enable PHP 8.3 for this account, then set the CLI default or adjust workflow candidate paths."
+            exit 1
+          fi
+
+          echo "Using remote PHP binary: $REMOTE_PHP"
+          "$REMOTE_PHP" -v
+          ENDSSH
+
       # ==================== DEPLOYMENT ====================
 
       - name: Deploy SWin Casino application
@@ -102,12 +129,30 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          set -e
+
+          REMOTE_PHP=""
+          for candidate in php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
+              if [ "$version" = "8.3" ] || [ "$version" = "8.4" ] || [ "$version" = "9.0" ]; then
+                REMOTE_PHP="$candidate"
+                break
+              fi
+            fi
+          done
+
+          if [ -z "$REMOTE_PHP" ]; then
+            echo "ERROR: Cannot warm caches because PHP 8.3+ CLI was not found."
+            exit 1
+          fi
+
           cd ${{ secrets.APP_PATH }}/core
-          php artisan optimize:clear || true
-          php artisan config:cache
-          php artisan route:cache
-          php artisan event:cache
-          php artisan view:cache
+          "$REMOTE_PHP" artisan optimize:clear || true
+          "$REMOTE_PHP" artisan config:cache
+          "$REMOTE_PHP" artisan route:cache
+          "$REMOTE_PHP" artisan event:cache
+          "$REMOTE_PHP" artisan view:cache
           ENDSSH
 
       - name: Validate deployment
