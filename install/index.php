@@ -12,12 +12,12 @@
     if ($action == 'requirements') {
     $passed      = [];
     $failed      = [];
-    $requiredPHP = 8.3;
+    $requiredPHP = '8.2';
     $currentPHP  = explode('.', PHP_VERSION)[0] . '.' . explode('.', PHP_VERSION)[1];
-    if ($requiredPHP == $currentPHP) {
-        $passed[] = "PHP version $requiredPHP is required";
+    if (version_compare($currentPHP, $requiredPHP, '>=')) {
+        $passed[] = "PHP version $requiredPHP+ is required";
     } else {
-        $failed[] = "PHP version $requiredPHP is required. Your current PHP version is $currentPHP";
+        $failed[] = "PHP version $requiredPHP+ is required. Your current PHP version is $currentPHP";
     }
     $extensions = ['BCMath', 'Ctype', 'cURL', 'DOM', 'Fileinfo', 'GD', 'JSON', 'Mbstring', 'OpenSSL', 'PCRE', 'PDO', 'pdo_mysql', 'Tokenizer', 'XML', 'Filter', 'Hash', 'Session', 'zip'];
     foreach ($extensions as $extension) {

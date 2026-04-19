@@ -20,7 +20,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.2"
           extensions: bcmath, ctype, curl, dom, fileinfo, json, mbstring, openssl, pdo, pdo_mysql, tokenizer, xml, zip, gd
           tools: composer:v2
 
@@ -39,17 +39,19 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Validate remote PHP 8.3+ availability
+      - name: Validate remote PHP 8.2+ availability
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           set -e
 
           REMOTE_PHP=""
-          for candidate in php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
+          for candidate in php8.2 php82 /opt/cpanel/ea-php82/root/usr/bin/php php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
             if command -v "$candidate" >/dev/null 2>&1; then
               version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
-              if [ "$version" = "8.3" ] || [ "$version" = "8.4" ] || [ "$version" = "9.0" ]; then
+              major="${version%%.*}"
+              minor="${version##*.}"
+              if [ "$major" = "8" ] && [ "$minor" -ge 2 ] 2>/dev/null; then
                 REMOTE_PHP="$candidate"
                 break
               fi
@@ -57,8 +59,8 @@ jobs:
           done
 
           if [ -z "$REMOTE_PHP" ]; then
-            echo "ERROR: No PHP 8.3+ CLI binary found on server."
-            echo "Install/enable PHP 8.3 for this account, then set the CLI default or adjust workflow candidate paths."
+            echo "ERROR: No PHP 8.2+ CLI binary found on server."
+            echo "Install/enable PHP 8.2 or higher for this account, then set the CLI default or adjust workflow candidate paths."
             exit 1
           fi
 
@@ -132,10 +134,12 @@ jobs:
           set -e
 
           REMOTE_PHP=""
-          for candidate in php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
+          for candidate in php8.2 php82 /opt/cpanel/ea-php82/root/usr/bin/php php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
             if command -v "$candidate" >/dev/null 2>&1; then
               version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
-              if [ "$version" = "8.3" ] || [ "$version" = "8.4" ] || [ "$version" = "9.0" ]; then
+              major="${version%%.*}"
+              minor="${version##*.}"
+              if [ "$major" = "8" ] && [ "$minor" -ge 2 ] 2>/dev/null; then
                 REMOTE_PHP="$candidate"
                 break
               fi
@@ -143,7 +147,7 @@ jobs:
           done
 
           if [ -z "$REMOTE_PHP" ]; then
-            echo "ERROR: Cannot warm caches because PHP 8.3+ CLI was not found."
+            echo "ERROR: Cannot warm caches because PHP 8.2+ CLI was not found."
             exit 1
           fi
 

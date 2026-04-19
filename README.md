@@ -1,6 +1,6 @@
 # SWin Casino — Enterprise Casino Platform
 
-**SWin Casino** is a clean, production-ready, self-hosted online casino platform built on **Laravel 11** (PHP 8.3+). It ships with a rich admin dashboard, 20+ automated payment gateways, a multi-language manager, KYC verification, 2FA, and a plug-and-play game engine. All vendor-specific licensing hooks have been removed; the codebase is ready to white-label for any brand.
+**SWin Casino** is a clean, production-ready, self-hosted online casino platform built on **Laravel 11** (PHP 8.2+). It ships with a rich admin dashboard, 20+ automated payment gateways, a multi-language manager, KYC verification, 2FA, and a plug-and-play game engine. All vendor-specific licensing hooks have been removed; the codebase is ready to white-label for any brand.
 
 > **Developed by [Scoware](https://scoware.com)** · support@scoware.com
 
@@ -11,7 +11,7 @@
 | Layer | Technology |
 |---|---|
 | Backend Framework | Laravel 11.x |
-| Language | PHP 8.3+ |
+| Language | PHP 8.2+ |
 | Database | MySQL 8.0+ / MariaDB 10.6+ |
 | Frontend Build | Vite + Axios |
 | Authentication | Laravel Sanctum (API) + Session (Web) |
@@ -41,7 +41,7 @@
 
 | Requirement | Minimum |
 |---|---|
-| PHP | 8.3+ |
+| PHP | 8.2+ |
 | MySQL | 8.0+ or MariaDB 10.6+ |
 | PHP Extensions | BCMath, Ctype, cURL, DOM, Fileinfo, GD, JSON, Mbstring, OpenSSL, PCRE, PDO, pdo_mysql, Tokenizer, XML, Filter, Hash, Session, Zip |
 | PHP Functions | `allow_url_fopen`, `file_get_contents` (must be enabled) |
@@ -263,7 +263,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
@@ -329,7 +329,7 @@ SMS providers (Twilio, Vonage, MessageBird, etc.) are configured via **Admin →
 - **Developed by:** [Scoware](https://scoware.com)
 - **Support Email:** support@scoware.com
 - **Platform Version:** 3.8 (Build 5.1.19)
-- **Framework:** Laravel 11 / PHP 8.3+
+- **Framework:** Laravel 11 / PHP 8.2+
 
 ---
 
