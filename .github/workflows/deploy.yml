@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_URL: https://swin.scoware.com
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+      DEPLOY_INSTALLER: ${{ secrets.DEPLOY_INSTALLER || 'false' }}
 
     steps:
       - name: Checkout code
@@ -34,14 +36,15 @@ jobs:
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
+          set -e
           mkdir -p ~/.ssh
           echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p "$DEPLOY_PORT" -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
       - name: Validate remote PHP 8.2+ availability
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           set -e
 
@@ -72,61 +75,64 @@ jobs:
 
       - name: Deploy SWin Casino application
         run: |
-          if [ "${{ secrets.DEPLOY_INSTALLER }}" = "true" ]; then
-            INSTALL_EXCLUDE=""
-          else
-            INSTALL_EXCLUDE="--exclude='install/'"
+          set -euo pipefail
+
+          rsync_excludes=(
+            --exclude='.git*'
+            --exclude='.github*'
+            --exclude='node_modules'
+            --exclude='cgi-bin/'
+            --exclude='.well-known/'
+            --exclude='.env'
+            --exclude='.env.*'
+            --exclude='storage/'
+            --exclude='sitemap.xml'
+            --exclude='robots.xml'
+            --exclude='assets/admin/push_config.json'
+            --exclude='assets/admin/images/profile/'
+            --exclude='assets/images/extensions/'
+            --exclude='assets/images/frontend/'
+            --exclude='assets/images/game/'
+            --exclude='assets/images/gateway/'
+            --exclude='assets/images/language/'
+            --exclude='assets/images/logo_icon/'
+            --exclude='assets/images/maintenance/'
+            --exclude='assets/images/push_notification/'
+            --exclude='assets/images/seo/'
+            --exclude='assets/images/user/'
+            --exclude='assets/images/verify/'
+            --exclude='assets/images/withdraw_method/'
+            --exclude='assets/in_app_purchase_config/'
+            --exclude='assets/support/'
+            --exclude='assets/templates/basic/css/custom.css'
+            --exclude='assets/templates/sunfyre/css/custom.css'
+            --exclude='core/.env'
+            --exclude='core/.env.*'
+            --exclude='core/bootstrap/cache/'
+            --exclude='core/storage/'
+            --exclude='core/resources/lang/*.json'
+          )
+
+          if [ "$DEPLOY_INSTALLER" != "true" ]; then
+            rsync_excludes+=(--exclude='install/')
           fi
 
-          eval rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no" \
-            --exclude='.git*' \
-            --exclude='.github*' \
-            --exclude='node_modules' \
-            --exclude='cgi-bin/' \
-            --exclude='.well-known/' \
-            --exclude='.env' \
-            --exclude='.env.*' \
-            $INSTALL_EXCLUDE \
-            --exclude='storage/' \
-            --exclude='sitemap.xml' \
-            --exclude='robots.xml' \
-            --exclude='assets/admin/push_config.json' \
-            --exclude='assets/admin/images/profile/' \
-            --exclude='assets/images/extensions/' \
-            --exclude='assets/images/frontend/' \
-            --exclude='assets/images/game/' \
-            --exclude='assets/images/gateway/' \
-            --exclude='assets/images/language/' \
-            --exclude='assets/images/logo_icon/' \
-            --exclude='assets/images/maintenance/' \
-            --exclude='assets/images/push_notification/' \
-            --exclude='assets/images/seo/' \
-            --exclude='assets/images/user/' \
-            --exclude='assets/images/verify/' \
-            --exclude='assets/images/withdraw_method/' \
-            --exclude='assets/in_app_purchase_config/' \
-            --exclude='assets/support/' \
-            --exclude='assets/templates/basic/css/custom.css' \
-            --exclude='assets/templates/sunfyre/css/custom.css' \
-            --exclude='core/.env' \
-            --exclude='core/.env.*' \
-            --exclude='core/bootstrap/cache/' \
-            --exclude='core/storage/' \
-            --exclude='core/resources/lang/*.json' \
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
+            "${rsync_excludes[@]}" \
             ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
 
       # ==================== POST-DEPLOYMENT ====================
 
       - name: Prepare runtime directories
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
             "mkdir -p '${{ secrets.APP_PATH }}/core/storage/app/public' '${{ secrets.APP_PATH }}/core/storage/framework/cache/data' '${{ secrets.APP_PATH }}/core/storage/framework/sessions' '${{ secrets.APP_PATH }}/core/storage/framework/views' '${{ secrets.APP_PATH }}/core/storage/logs' '${{ secrets.APP_PATH }}/core/bootstrap/cache'"
 
       - name: Set Laravel permissions
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           cd ${{ secrets.APP_PATH }}
           chmod -R 755 core/storage core/bootstrap/cache
@@ -135,7 +141,7 @@ jobs:
 
       - name: Warm Laravel caches
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           set -e
 
@@ -167,7 +173,7 @@ jobs:
 
       - name: Validate deployment
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           echo "=== Deployment Validation ==="
           echo ""
