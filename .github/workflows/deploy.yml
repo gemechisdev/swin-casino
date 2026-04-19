@@ -1,0 +1,141 @@
+name: Deploy SWin Casino
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      APP_URL: https://swin.scoware.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ==================== DEPENDENCIES ====================
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: bcmath, ctype, curl, dom, fileinfo, json, mbstring, openssl, pdo, pdo_mysql, tokenizer, xml, zip, gd
+          tools: composer:v2
+
+      - name: Install Composer dependencies (production)
+        working-directory: core
+        run: composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress
+
+      # ==================== SSH SETUP ====================
+
+      - name: Setup SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      # ==================== DEPLOYMENT ====================
+
+      - name: Deploy SWin Casino application
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no" \
+            --exclude='.git*' \
+            --exclude='.github*' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='install/' \
+            --exclude='storage/' \
+            --exclude='sitemap.xml' \
+            --exclude='robots.xml' \
+            --exclude='assets/admin/push_config.json' \
+            --exclude='assets/admin/images/profile/' \
+            --exclude='assets/images/extensions/' \
+            --exclude='assets/images/frontend/' \
+            --exclude='assets/images/game/' \
+            --exclude='assets/images/gateway/' \
+            --exclude='assets/images/language/' \
+            --exclude='assets/images/logo_icon/' \
+            --exclude='assets/images/maintenance/' \
+            --exclude='assets/images/push_notification/' \
+            --exclude='assets/images/seo/' \
+            --exclude='assets/images/user/' \
+            --exclude='assets/images/verify/' \
+            --exclude='assets/images/withdraw_method/' \
+            --exclude='assets/in_app_purchase_config/' \
+            --exclude='assets/support/' \
+            --exclude='assets/templates/basic/css/custom.css' \
+            --exclude='assets/templates/sunfyre/css/custom.css' \
+            --exclude='core/.env' \
+            --exclude='core/.env.*' \
+            --exclude='core/bootstrap/cache/' \
+            --exclude='core/storage/' \
+            --exclude='core/resources/lang/*.json' \
+            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
+
+      # ==================== POST-DEPLOYMENT ====================
+
+      - name: Prepare runtime directories
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "mkdir -p '${{ secrets.APP_PATH }}/core/storage/app/public' '${{ secrets.APP_PATH }}/core/storage/framework/cache/data' '${{ secrets.APP_PATH }}/core/storage/framework/sessions' '${{ secrets.APP_PATH }}/core/storage/framework/views' '${{ secrets.APP_PATH }}/core/storage/logs' '${{ secrets.APP_PATH }}/core/bootstrap/cache'"
+
+      - name: Set Laravel permissions
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          cd ${{ secrets.APP_PATH }}
+          chmod -R 755 core/storage core/bootstrap/cache
+          chmod -R 775 core/storage/app core/storage/framework core/storage/logs core/bootstrap/cache
+          ENDSSH
+
+      - name: Warm Laravel caches
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          cd ${{ secrets.APP_PATH }}/core
+          php artisan optimize:clear || true
+          php artisan config:cache
+          php artisan route:cache
+          php artisan event:cache
+          php artisan view:cache
+          ENDSSH
+
+      - name: Validate deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+          echo "=== Deployment Validation ==="
+          echo ""
+          echo "Application:"
+          echo "  App path exists: $([ -d "${{ secrets.APP_PATH }}" ] && echo "✓" || echo "✗")"
+          echo "  Root index exists: $([ -f "${{ secrets.APP_PATH }}/index.php" ] && echo "✓" || echo "✗")"
+          echo "  Root .htaccess exists: $([ -f "${{ secrets.APP_PATH }}/.htaccess" ] && echo "✓" || echo "✗")"
+          echo "  Composer autoload exists: $([ -f "${{ secrets.APP_PATH }}/core/vendor/autoload.php" ] && echo "✓" || echo "✗")"
+          echo "  Config cached: $([ -f "${{ secrets.APP_PATH }}/core/bootstrap/cache/config.php" ] && echo "✓" || echo "✗")"
+          echo ""
+          echo "Writable runtime data:"
+          echo "  Core storage exists: $([ -d "${{ secrets.APP_PATH }}/core/storage" ] && echo "✓" || echo "✗")"
+          echo "  Frontend uploads preserved: $([ -d "${{ secrets.APP_PATH }}/assets/images/frontend" ] && echo "✓" || echo "✗")"
+          echo ""
+          echo "=== Deployment Complete ==="
+          ENDSSH
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✓ SWin Casino deployed successfully to ${{ env.APP_URL }}"
+          echo "✓ Application URL: ${{ env.APP_URL }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "✗ Deployment failed. Check the logs above for details."
+          exit 1
