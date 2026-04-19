@@ -74,7 +74,7 @@
     @php
         $cookie = App\Models\Frontend::where('data_keys', 'cookie.data')->first();
     @endphp
-    @if ($cookie->data_values->status == Status::ENABLE && !\Cookie::get('gdpr_cookie'))
+    @if ($cookie && $cookie->data_values->status == Status::ENABLE && !\Cookie::get('gdpr_cookie'))
         <div class="cookies-card text-center hide">
             <div class="cookies-card__icon bg--base">
                 <i class="las la-cookie-bite"></i>

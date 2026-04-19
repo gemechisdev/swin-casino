@@ -190,7 +190,11 @@ function getPageSections($arr = false) {
 
 function getImage($image, $size = null) {
     $clean = '';
-    if (file_exists($image) && is_file($image)) {
+    // Use an absolute path so the check works regardless of the current working
+    // directory (e.g. under PHP-FPM where CWD is not the web root, or when
+    // invoked from an Artisan command run from the core/ sub-directory).
+    $absolutePath = dirname(base_path()) . '/' . $image;
+    if (file_exists($absolutePath) && is_file($absolutePath)) {
         return asset($image) . $clean;
     }
     if ($size) {
