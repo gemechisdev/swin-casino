@@ -4,8 +4,13 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Ensure the working directory is always the web root so that relative asset
+// paths (e.g. "assets/images/…") resolve correctly under PHP-FPM environments
+// where the CWD is not guaranteed to be the document root.
+chdir(__DIR__);
+
 // Determine if the application is in maintenance mode...
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+if (file_exists($maintenance = __DIR__.'/core/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 

@@ -122,6 +122,16 @@ jobs:
             "${rsync_excludes[@]}" \
             ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
 
+          # Seed default logo assets only for files that do not yet exist on
+          # the remote server.  Using --ignore-existing preserves any custom
+          # logos that an administrator may have uploaded via the admin panel
+          # while still ensuring that a brand-new deployment has working logos
+          # instead of showing placeholder images.
+          rsync -avz --ignore-existing \
+            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
+            ./assets/images/logo_icon/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/images/logo_icon/
+
       # ==================== POST-DEPLOYMENT ====================
 
       - name: Validate .env configuration
