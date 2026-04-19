@@ -21,10 +21,22 @@ use Illuminate\Support\Str;
 
 
 function systemDetails() {
-    $system['name']          = 'xaxino';
+    $system['name']          = config('app.name', env('APP_NAME', 'SWin Casino'));
     $system['version']       = '3.8';
     $system['build_version'] = '5.1.19';
     return $system;
+}
+
+function brandName() {
+    return config('app.brand_name', 'Scoware');
+}
+
+function brandUrl() {
+    return config('app.brand_url', 'https://scoware.com');
+}
+
+function brandEmail() {
+    return config('app.brand_email', 'support@scoware.com');
 }
 
 function slug($string) {

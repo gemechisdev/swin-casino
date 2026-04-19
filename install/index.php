@@ -1,5 +1,5 @@
 <?php
-    $itemName = 'xaxino';
+    $itemName = 'swin-casino';
     error_reporting(E_ALL);
     $action = isset($_GET['action']) ? $_GET['action'] : '';
     function appUrl() {
@@ -110,12 +110,19 @@
         try {
             $envLocation = '../core/.env';
             $appKey      = 'base64:' . base64_encode(random_bytes(32));
-            $envBody  = "APP_NAME=\"Casino Platform\"\n";
+            $appName     = isset($_POST['app_name'])    ? trim($_POST['app_name'])    : 'SWin Casino';
+            $brandName   = isset($_POST['brand_name'])  ? trim($_POST['brand_name'])  : 'Scoware';
+            $brandUrl    = isset($_POST['brand_url'])   ? trim($_POST['brand_url'])   : 'https://scoware.com';
+            $brandEmail  = isset($_POST['brand_email']) ? trim($_POST['brand_email']) : 'support@scoware.com';
+            $envBody  = "APP_NAME=\"" . $appName . "\"\n";
             $envBody .= "APP_ENV=production\n";
             $envBody .= "APP_KEY=" . $appKey . "\n";
             $envBody .= "APP_DEBUG=false\n";
             $envBody .= "APP_TIMEZONE=UTC\n";
             $envBody .= "APP_URL=" . rtrim($_POST['url'], '/') . "\n\n";
+            $envBody .= "APP_BRAND_NAME=\"" . $brandName . "\"\n";
+            $envBody .= "APP_BRAND_URL=\"" . $brandUrl . "\"\n";
+            $envBody .= "APP_BRAND_EMAIL=\"" . $brandEmail . "\"\n\n";
             $envBody .= "APP_LOCALE=en\n";
             $envBody .= "APP_FALLBACK_LOCALE=en\n";
             $envBody .= "APP_FAKER_LOCALE=en_US\n\n";
@@ -141,8 +148,8 @@
             $envBody .= "MAIL_USERNAME=null\n";
             $envBody .= "MAIL_PASSWORD=null\n";
             $envBody .= "MAIL_ENCRYPTION=null\n";
-            $envBody .= "MAIL_FROM_ADDRESS=\"hello@example.com\"\n";
-            $envBody .= "MAIL_FROM_NAME=\"Casino Platform\"\n";
+            $envBody .= "MAIL_FROM_ADDRESS=\"" . $brandEmail . "\"\n";
+            $envBody .= "MAIL_FROM_NAME=\"" . $appName . "\"\n";
 
             file_put_contents($envLocation, $envBody);
         } catch (Exception $e) {
@@ -154,6 +161,9 @@
     if (isset($response['error']) && $response['error'] == 'ok') {
         try {
             $db->query("UPDATE admins SET email='" . $_POST['email'] . "', username='" . $_POST['admin_user'] . "', password='" . password_hash($_POST['admin_pass'], PASSWORD_DEFAULT) . "' WHERE username='admin'");
+            // Update site_name in general_settings from the installer form
+            $siteName = isset($_POST['app_name']) ? $db->quote(trim($_POST['app_name'])) : "'SWin Casino'";
+            $db->query("UPDATE general_settings SET site_name=" . $siteName . " WHERE id=1");
         } catch (Exception $e) {
             $response['message'] = 'Installer was unable to set the admin credentials.';
         }
@@ -178,7 +188,7 @@
 	<header class="py-3 border-bottom border-primary bg--dark">
 		<div class="container">
 			<div class="d-flex align-items-center justify-content-between header gap-3">
-				<h3 class="title">Casino Platform</h3>
+				<h3 class="title"><?php echo isset($_POST['app_name']) ? htmlspecialchars($_POST['app_name']) : 'SWin Casino'; ?></h3>
 				<h3 class="title">Easy Installer</h3>
 			</div>
 		</div>
@@ -213,6 +223,27 @@
                                 } else if ($action == 'information') {
                                 ?>
 								<form action="?action=result" method="post" class="information-form-area mb--20">
+									<div class="info-item">
+										<h5 class="font-weight-normal mb-2">Application Branding</h5>
+										<div class="row">
+											<div class="information-form-group col-sm-6">
+												<label>Site / Casino Name</label>
+												<input type="text" name="app_name" placeholder="SWin Casino" value="SWin Casino" required>
+											</div>
+											<div class="information-form-group col-sm-6">
+												<label>Developer / Brand Name</label>
+												<input type="text" name="brand_name" placeholder="Scoware" value="Scoware">
+											</div>
+											<div class="information-form-group col-sm-6">
+												<label>Brand Website URL</label>
+												<input type="url" name="brand_url" placeholder="https://scoware.com" value="https://scoware.com">
+											</div>
+											<div class="information-form-group col-sm-6">
+												<label>Brand / Support Email</label>
+												<input type="email" name="brand_email" placeholder="support@scoware.com" value="support@scoware.com">
+											</div>
+										</div>
+									</div>
 									<div class="info-item">
 										<h5 class="font-weight-normal mb-2">Website URL</h5>
 										<div class="row">
@@ -330,7 +361,7 @@
 	</div>
 	<footer class="py-3 text-center bg--dark border-top border-primary">
 		<div class="container">
-			<p class="m-0 font-weight-bold">&copy;<?php echo Date('Y') ?> - Casino Platform. All Rights Reserved.</p>
+			<p class="m-0 font-weight-bold">&copy;<?php echo Date('Y') ?> - Scoware. All Rights Reserved.</p>
 		</div>
 	</footer>
 	<script src="../assets/global/js/bootstrap.bundle.min.js"></script>
