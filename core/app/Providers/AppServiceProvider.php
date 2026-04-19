@@ -30,19 +30,17 @@ class AppServiceProvider extends ServiceProvider {
             return;
         }
 
+        // Check .env BEFORE touching the cache (cache needs a working DB connection).
+        // Without this ordering, a missing .env causes cache() to fail with a 500 error
+        // because Laravel falls back to the default DB driver (which has no credentials).
+        $envFilePath = base_path('.env');
+        if (!file_exists($envFilePath) || empty(trim(file_get_contents($envFilePath)))) {
+            header('Location: install');
+            exit;
+        }
+
         if (!cache()->get('SystemInstalled')) {
-            $envFilePath = base_path('.env');
-            if (!file_exists($envFilePath)) {
-                header('Location: install');
-                exit;
-            }
-            $envContents = file_get_contents($envFilePath);
-            if (empty($envContents)) {
-                header('Location: install');
-                exit;
-            } else {
-                cache()->put('SystemInstalled', true);
-            }
+            cache()->put('SystemInstalled', true);
         }
         $viewShare['emptyMessage'] = 'Data not found';
         view()->share($viewShare);

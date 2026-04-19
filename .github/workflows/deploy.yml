@@ -186,6 +186,7 @@ jobs:
 
           cd ${{ secrets.APP_PATH }}/core
           "$REMOTE_PHP" artisan optimize:clear || true
+          "$REMOTE_PHP" artisan storage:link --force || true
           "$REMOTE_PHP" artisan config:cache
           "$REMOTE_PHP" artisan route:cache
           "$REMOTE_PHP" artisan event:cache
