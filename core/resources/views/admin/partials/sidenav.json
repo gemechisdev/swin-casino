@@ -27,12 +27,7 @@
         "menu_active": "admin.dashboard"
     },
     "referral": {
-        "keyword": [
-            "Referral",
-            "Bonus",
-            "Commission",
-            "Percentage"
-        ],
+        "keyword": ["Referral", "Bonus", "Commission", "Percentage"],
         "title": "Referral",
         "icon": "las la-link",
         "route_name": "admin.referral.index",
@@ -57,10 +52,7 @@
                 "menu_active": "admin.game.index"
             },
             {
-                "keyword": [
-                    "Game Log",
-                    "Game Statistics"
-                ],
+                "keyword": ["Game Log", "Game Statistics"],
                 "title": "Game Log",
                 "route_name": "admin.game.log",
                 "menu_active": "admin.game.log"
@@ -200,9 +192,7 @@
     "deposits": {
         "title": "Deposits",
         "icon": "las la-file-invoice-dollar",
-        "counters": [
-            "pendingDepositsCount"
-        ],
+        "counters": ["pendingDepositsCount"],
         "menu_active": "admin.deposit*",
         "submenu": [
             {
@@ -295,9 +285,7 @@
     "withdrawals": {
         "title": "Withdrawals",
         "icon": "la la-bank",
-        "counters": [
-            "pendingWithdrawCount"
-        ],
+        "counters": ["pendingWithdrawCount"],
         "menu_active": "admin.withdraw.data*",
         "submenu": [
             {
@@ -365,9 +353,7 @@
     "support_ticket": {
         "title": "Support Ticket",
         "icon": "la la-ticket",
-        "counters": [
-            "pendingTicketCount"
-        ],
+        "counters": ["pendingTicketCount"],
         "menu_active": "admin.ticket*",
         "submenu": [
             {
@@ -489,9 +475,7 @@
                 ],
                 "title": "Transfer History",
                 "route_name": "admin.report.transfer",
-                "menu_active": [
-                    "admin.report.transfer"
-                ]
+                "menu_active": ["admin.report.transfer"]
             }
         ]
     },
@@ -569,9 +553,7 @@
         "title": "Extra",
         "icon": "la la-server",
         "menu_active": "admin.system*",
-        "counters": [
-            "updateAvailable"
-        ],
+        "counters": ["updateAvailable"],
         "submenu": [
             {
                 "keyword": [
@@ -651,7 +633,7 @@
         ],
         "title": "Report & Request",
         "icon": "las la-bug",
-        "route_name": "admin.request.report",
-        "menu_active": "admin.request.report"
+        "route_name": "admin.report.transaction",
+        "menu_active": "admin.report.*"
     }
 }

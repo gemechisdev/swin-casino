@@ -43,7 +43,15 @@
                                             }
                                         @endphp
                                         <li class="sidebar-menu-item {{ menuActive(@$menu->menu_active) }} ">
-                                            <a href="{{ route(@$menu->route_name, $submenuParams) }}" class="nav-link">
+                                            @php
+                                                $submenuRoute = @$menu->route_name;
+                                                $submenuLink =
+                                                    $submenuRoute &&
+                                                    \Illuminate\Support\Facades\Route::has($submenuRoute)
+                                                        ? route($submenuRoute, $submenuParams)
+                                                        : 'javascript:void(0)';
+                                            @endphp
+                                            <a href="{{ $submenuLink }}" class="nav-link">
                                                 <i class="menu-icon las la-dot-circle"></i>
                                                 <span class="menu-title">{{ __($menu->title) }}</span>
                                                 @php $counter = @$menu->counter; @endphp
@@ -67,7 +75,14 @@
                             }
                         @endphp
                         <li class="sidebar-menu-item {{ menuActive(@$data->menu_active) }}">
-                            <a href="{{ route(@$data->route_name, $mainParams) }}" class="nav-link ">
+                            @php
+                                $mainRoute = @$data->route_name;
+                                $mainLink =
+                                    $mainRoute && \Illuminate\Support\Facades\Route::has($mainRoute)
+                                        ? route($mainRoute, $mainParams)
+                                        : 'javascript:void(0)';
+                            @endphp
+                            <a href="{{ $mainLink }}" class="nav-link ">
                                 <i class="menu-icon {{ $data->icon }}"></i>
                                 <span class="menu-title">{{ __(@$data->title) }}</span>
                                 @php $counter = @$data->counter; @endphp
