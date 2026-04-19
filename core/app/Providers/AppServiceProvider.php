@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider {
      * Bootstrap any application services.
      */
     public function boot(): void {
-        if (!cache()->get('SystemInstalled')) {
+        if (!cache()->get('SystemInstalled') && !$this->shouldBypassInstallerRedirect()) {
             $envFilePath = base_path('.env');
             if (!file_exists($envFilePath)) {
                 header('Location: install');
@@ -76,5 +76,17 @@ class AppServiceProvider extends ServiceProvider {
         }
 
         Paginator::useBootstrapFive();
+    }
+
+    private function shouldBypassInstallerRedirect(): bool {
+        if (app()->runningInConsole()) {
+            return true;
+        }
+
+        if (!request()) {
+            return false;
+        }
+
+        return request()->is('install', 'install/*', 'assets/*', 'favicon.ico', 'robots.txt', 'sitemap.xml');
     }
 }
