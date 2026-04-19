@@ -125,6 +125,7 @@ jobs:
       # ==================== POST-DEPLOYMENT ====================
 
       - name: Validate .env configuration
+        if: env.DEPLOY_INSTALLER != 'true'
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
@@ -159,6 +160,7 @@ jobs:
           ENDSSH
 
       - name: Warm Laravel caches
+        if: env.DEPLOY_INSTALLER != 'true'
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
@@ -191,6 +193,7 @@ jobs:
           ENDSSH
 
       - name: Validate deployment
+        if: always()
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
@@ -201,7 +204,13 @@ jobs:
           echo "  Root index exists: $([ -f "${{ secrets.APP_PATH }}/index.php" ] && echo "✓" || echo "✗")"
           echo "  Root .htaccess exists: $([ -f "${{ secrets.APP_PATH }}/.htaccess" ] && echo "✓" || echo "✗")"
           echo "  Composer autoload exists: $([ -f "${{ secrets.APP_PATH }}/core/vendor/autoload.php" ] && echo "✓" || echo "✗")"
-          echo "  Config cached: $([ -f "${{ secrets.APP_PATH }}/core/bootstrap/cache/config.php" ] && echo "✓" || echo "✗")"
+          if [ "${{ env.DEPLOY_INSTALLER }}" = "true" ]; then
+            echo "  Installer folder exists: $([ -f "${{ secrets.APP_PATH }}/install/index.php" ] && echo "✓" || echo "✗")"
+            echo "  .env file intentionally absent until installation completes"
+          else
+            echo "  .env file exists: $([ -f "${{ secrets.APP_PATH }}/core/.env" ] && echo "✓" || echo "✗")"
+            echo "  Config cached: $([ -f "${{ secrets.APP_PATH }}/core/bootstrap/cache/config.php" ] && echo "✓" || echo "✗")"
+          fi
           echo ""
           echo "Writable runtime data:"
           echo "  Core storage exists: $([ -d "${{ secrets.APP_PATH }}/core/storage" ] && echo "✓" || echo "✗")"
