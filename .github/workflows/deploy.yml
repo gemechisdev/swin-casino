@@ -155,7 +155,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
           cd ${{ secrets.APP_PATH }}
-          chmod -R 755 core/storage core/bootstrap/cache
+          chmod -R 775 core/storage core/bootstrap/cache
           chmod -R 775 core/storage/app core/storage/framework core/storage/logs core/bootstrap/cache
           ENDSSH
 
