@@ -176,19 +176,21 @@ jobs:
           echo "✓ DB_CONNECTION is configured"
           ENDSSH
 
-      - name: Prepare runtime directories
-        run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "mkdir -p '${{ secrets.APP_PATH }}/core/storage/app/public' '${{ secrets.APP_PATH }}/core/storage/framework/cache/data' '${{ secrets.APP_PATH }}/core/storage/framework/sessions' '${{ secrets.APP_PATH }}/core/storage/framework/views' '${{ secrets.APP_PATH }}/core/storage/logs' '${{ secrets.APP_PATH }}/core/bootstrap/cache'"
-
-      - name: Set Laravel permissions
+      - name: Prepare runtime directories and set permissions
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          cd ${{ secrets.APP_PATH }}
-          chmod -R 775 core/storage core/bootstrap/cache
-          chmod -R 775 core/storage/app core/storage/framework core/storage/logs core/bootstrap/cache
+          set -e
+          mkdir -p \
+            "${{ secrets.APP_PATH }}/core/storage/app/public" \
+            "${{ secrets.APP_PATH }}/core/storage/framework/cache/data" \
+            "${{ secrets.APP_PATH }}/core/storage/framework/sessions" \
+            "${{ secrets.APP_PATH }}/core/storage/framework/views" \
+            "${{ secrets.APP_PATH }}/core/storage/logs" \
+            "${{ secrets.APP_PATH }}/core/bootstrap/cache"
+          chmod -R 775 \
+            "${{ secrets.APP_PATH }}/core/storage" \
+            "${{ secrets.APP_PATH }}/core/bootstrap/cache"
           ENDSSH
 
       - name: Warm Laravel caches
