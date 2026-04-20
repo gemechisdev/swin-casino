@@ -112,7 +112,7 @@ class GeneralSettingController extends Controller
     {
         $request->validate([
             'logo'    => ['image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-            'favicon' => ['image', new FileTypeValidate(['png'])],
+            'favicon' => ['file', new FileTypeValidate(['ico'])],
             'pwa_thumb'   => ['image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
             'pwa_favicon' => ['image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
         ]);
@@ -120,13 +120,13 @@ class GeneralSettingController extends Controller
             $this->uploadImage($request->logo, 'logo.png');
         }
         if ($request->hasFile('favicon')) {
-            $this->uploadImage($request->favicon, 'favicon.png');
+            $this->uploadImage($request->favicon, 'favicon.ico');
         }
         if ($request->hasFile('pwa_thumb')) {
-            $this->uploadImage($request->pwa_thumb, "pwa_thumb.png", getFileSize('pwa_thumb'));
+            $this->uploadImage($request->pwa_thumb, "android-chrome-512x512.png", getFileSize('pwa_thumb'));
         }
         if ($request->hasFile('pwa_favicon')) {
-            $this->uploadImage($request->pwa_favicon, "pwa_favicon.png", getFileSize('pwa_favicon'));
+            $this->uploadImage($request->pwa_favicon, "android-chrome-192x192.png", getFileSize('pwa_favicon'));
         }
 
         RequiredConfig::configured('logo_favicon');

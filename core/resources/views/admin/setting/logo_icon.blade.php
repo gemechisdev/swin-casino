@@ -26,11 +26,11 @@
                         <div class="row justify-content-center">
                             <div class="form-group col-md-8 col-sm-6">
                                 <label>@lang('PWA Thumb')</label>
-                                <x-image-uploader name="pwa_thumb" :imagePath="getImage(getFilePath('logoIcon') . '/pwa_thumb.png', getFileSize('pwa_thumb'))" :size="getFileSize('pwa_thumb')" class="w-100" id="pwaThumb" :required="false" />
+                                <x-image-uploader name="pwa_thumb" :imagePath="getImage(getFilePath('logoIcon') . '/android-chrome-512x512.png', getFileSize('pwa_thumb'))" :size="getFileSize('pwa_thumb')" class="w-100" id="pwaThumb" :required="false" />
                             </div>
                             <div class="form-group col-md-4 col-sm-6">
                                 <label>@lang('PWA Favicon')</label>
-                                <x-image-uploader name="pwa_favicon" :imagePath="getImage(getFilePath('logoIcon') . '/pwa_favicon.png', getFileSize('pwa_favicon'))" :size="getFileSize('pwa_favicon')" class="w-100" id="pwaFavicon" :required="false" />
+                                <x-image-uploader name="pwa_favicon" :imagePath="getImage(getFilePath('logoIcon') . '/android-chrome-192x192.png', getFileSize('pwa_favicon'))" :size="getFileSize('pwa_favicon')" class="w-100" id="pwaFavicon" :required="false" />
                             </div>
                         </div>
                         <button type="submit" class="btn btn--primary w-100 h-45">@lang('Submit')</button>

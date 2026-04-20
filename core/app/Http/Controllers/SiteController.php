@@ -225,12 +225,12 @@ class SiteController extends Controller {
             "description"      => $gs->site_name . " PWA",
             "icons"            => [
                 [
-                    "src"   => getImage(getFilePath('logoIcon') . '/pwa_favicon.png'),
+                    "src"   => getImage(getFilePath('logoIcon') . '/android-chrome-192x192.png'),
                     "sizes" => "192x192",
                     "type"  => "image/png",
                 ],
                 [
-                    "src"   => getImage(getFilePath('logoIcon') . '/pwa_thumb.png'),
+                    "src"   => getImage(getFilePath('logoIcon') . '/android-chrome-512x512.png'),
                     "sizes" => "512x512",
                     "type"  => "image/png",
                 ],

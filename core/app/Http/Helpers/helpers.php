@@ -83,7 +83,7 @@ function siteLogo($type = null) {
 }
 
 function siteFavicon() {
-    return getImage(getFilePath('logoIcon') . '/favicon.png');
+    return getImage(getFilePath('logoIcon') . '/favicon.ico');
 }
 
 function loadReCaptcha() {
