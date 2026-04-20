@@ -1,5 +1,7 @@
 # AddisWin Casino — Enterprise Casino Platform
 
+[![Deploy AddisWin Casino](https://github.com/gemechisdev/swin-casino/actions/workflows/deploy.yml/badge.svg)](https://github.com/gemechisdev/swin-casino/actions/workflows/deploy.yml)
+
 **AddisWin Casino** is a clean, production-ready, self-hosted online casino platform built on **Laravel 11** (PHP 8.2+). It ships with a rich admin dashboard, 20+ automated payment gateways, a multi-language manager, KYC verification, 2FA, and a plug-and-play game engine. All vendor-specific licensing hooks have been removed; the codebase is ready to white-label for any brand.
 
 > **Developed by [Scoware](https://scoware.com)** · support@scoware.com

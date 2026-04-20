@@ -77,6 +77,18 @@ jobs:
         run: |
           set -euo pipefail
 
+          DEPLOY_USER="${{ secrets.DEPLOY_USER }}"
+          DEPLOY_HOST="${{ secrets.DEPLOY_HOST }}"
+          APP_PATH="${{ secrets.APP_PATH }}"
+
+          if [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_HOST" ] || [ -z "$APP_PATH" ]; then
+            echo "ERROR: DEPLOY_USER, DEPLOY_HOST, and APP_PATH secrets must all be set."
+            exit 1
+          fi
+
+          APP_PATH="${APP_PATH%/}"
+          REMOTE_TARGET="$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/"
+
           rsync_excludes=(
             --exclude='.git*'
             --exclude='.github*'
@@ -117,10 +129,15 @@ jobs:
             rsync_excludes+=(--exclude='install/')
           fi
 
+          # Ensure remote deployment directories exist before rsync writes files.
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p '$APP_PATH' '$APP_PATH/assets/images' '$APP_PATH/assets/admin/images/profile' '$APP_PATH/assets/audio'"
+
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             "${rsync_excludes[@]}" \
-            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
+            ./ "$REMOTE_TARGET"
 
           # Seed all default/bundled asset directories that are excluded from the
           # main rsync (to avoid overwriting admin-uploaded content on updates).
@@ -142,17 +159,17 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             "${SEED_EXCLUDES[@]}" \
             ./assets/images/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/images/
+            "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/assets/images/"
 
           rsync -avz --ignore-existing \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             ./assets/admin/images/profile/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/admin/images/profile/
+            "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/assets/admin/images/profile/"
 
           rsync -avz --ignore-existing \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             ./assets/audio/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/audio/
+            "$DEPLOY_USER@$DEPLOY_HOST:$APP_PATH/assets/audio/"
 
       # ==================== POST-DEPLOYMENT ====================
 
