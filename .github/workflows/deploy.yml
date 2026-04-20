@@ -11,7 +11,6 @@ jobs:
     env:
       APP_URL: https://addiswin.scoware.com
       DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
-      DEPLOY_INSTALLER: ${{ secrets.DEPLOY_INSTALLER || 'false' }}
 
     steps:
       - name: Checkout code
@@ -125,10 +124,6 @@ jobs:
             --exclude='core/resources/lang/*.json'
           )
 
-          if [ "$DEPLOY_INSTALLER" != "true" ]; then
-            rsync_excludes+=(--exclude='install/')
-          fi
-
           # Ensure remote deployment directories exist before rsync writes files.
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             "$DEPLOY_USER@$DEPLOY_HOST" \
@@ -173,8 +168,24 @@ jobs:
 
       # ==================== POST-DEPLOYMENT ====================
 
+      - name: Check if .env exists on remote
+        id: check_env
+        run: |
+          DEPLOY_USER="${{ secrets.DEPLOY_USER }}"
+          DEPLOY_HOST="${{ secrets.DEPLOY_HOST }}"
+          APP_PATH="${{ secrets.APP_PATH }}"
+          ENV_EXISTS=$(ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "[ -f \"${APP_PATH}/core/.env\" ] && echo 'true' || echo 'false'")
+          echo "env_exists=$ENV_EXISTS" >> "$GITHUB_OUTPUT"
+          if [ "$ENV_EXISTS" = "true" ]; then
+            echo "INFO: core/.env found — running as an update deployment"
+          else
+            echo "INFO: core/.env not found — installer will be served; cache warming skipped"
+          fi
+
       - name: Validate .env configuration
-        if: env.DEPLOY_INSTALLER != 'true'
+        if: steps.check_env.outputs.env_exists == 'true'
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
@@ -209,7 +220,7 @@ jobs:
           ENDSSH
 
       - name: Warm Laravel caches
-        if: env.DEPLOY_INSTALLER != 'true'
+        if: steps.check_env.outputs.env_exists == 'true'
         run: |
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
@@ -254,12 +265,12 @@ jobs:
           echo "  Root index exists: $([ -f "${{ secrets.APP_PATH }}/index.php" ] && echo "✓" || echo "✗")"
           echo "  Root .htaccess exists: $([ -f "${{ secrets.APP_PATH }}/.htaccess" ] && echo "✓" || echo "✗")"
           echo "  Composer autoload exists: $([ -f "${{ secrets.APP_PATH }}/core/vendor/autoload.php" ] && echo "✓" || echo "✗")"
-          if [ "${{ env.DEPLOY_INSTALLER }}" = "true" ]; then
-            echo "  Installer folder exists: $([ -f "${{ secrets.APP_PATH }}/install/index.php" ] && echo "✓" || echo "✗")"
-            echo "  .env file intentionally absent until installation completes"
-          else
-            echo "  .env file exists: $([ -f "${{ secrets.APP_PATH }}/core/.env" ] && echo "✓" || echo "✗")"
+          if [ -f "${{ secrets.APP_PATH }}/core/.env" ]; then
+            echo "  .env file exists: ✓"
             echo "  Config cached: $([ -f "${{ secrets.APP_PATH }}/core/bootstrap/cache/config.php" ] && echo "✓" || echo "✗")"
+          else
+            echo "  .env file not yet created — installer active at /install/"
+            echo "  Installer folder exists: $([ -f "${{ secrets.APP_PATH }}/install/index.php" ] && echo "✓" || echo "✗")"
           fi
           echo ""
           echo "Writable runtime data:"
