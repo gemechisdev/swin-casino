@@ -1,5 +1,5 @@
 <?php
-    $itemName = 'swin-casino';
+    $itemName = 'addiswin-casino';
     error_reporting(E_ALL);
     $action = isset($_GET['action']) ? $_GET['action'] : '';
     function appUrl() {
@@ -110,7 +110,7 @@
         try {
             $envLocation = '../core/.env';
             $appKey      = 'base64:' . base64_encode(random_bytes(32));
-            $appName     = isset($_POST['app_name'])    ? trim($_POST['app_name'])    : 'SWin Casino';
+            $appName     = isset($_POST['app_name'])    ? trim($_POST['app_name'])    : 'AddisWin Casino';
             $brandName   = isset($_POST['brand_name'])  ? trim($_POST['brand_name'])  : 'Scoware';
             $brandUrl    = isset($_POST['brand_url'])   ? trim($_POST['brand_url'])   : 'https://scoware.com';
             $brandEmail  = isset($_POST['brand_email']) ? trim($_POST['brand_email']) : 'support@scoware.com';
@@ -162,7 +162,7 @@
         try {
             $db->query("UPDATE admins SET email='" . $_POST['email'] . "', username='" . $_POST['admin_user'] . "', password='" . password_hash($_POST['admin_pass'], PASSWORD_DEFAULT) . "' WHERE username='admin'");
             // Update site_name in general_settings from the installer form
-            $siteName = isset($_POST['app_name']) ? $db->quote(trim($_POST['app_name'])) : "'SWin Casino'";
+            $siteName = isset($_POST['app_name']) ? $db->quote(trim($_POST['app_name'])) : "'AddisWin Casino'";
             $db->query("UPDATE general_settings SET site_name=" . $siteName . " WHERE id=1");
         } catch (Exception $e) {
             $response['message'] = 'Installer was unable to set the admin credentials.';
@@ -231,7 +231,7 @@
 	<header class="py-3 border-bottom border-primary bg--dark">
 		<div class="container">
 			<div class="d-flex align-items-center justify-content-between header gap-3">
-				<h3 class="title"><?php echo isset($_POST['app_name']) ? htmlspecialchars($_POST['app_name']) : 'SWin Casino'; ?></h3>
+				<h3 class="title"><?php echo isset($_POST['app_name']) ? htmlspecialchars($_POST['app_name']) : 'AddisWin Casino'; ?></h3>
 				<h3 class="title">Easy Installer</h3>
 			</div>
 		</div>
@@ -271,7 +271,7 @@
 										<div class="row">
 											<div class="information-form-group col-sm-6">
 												<label>Site / Casino Name</label>
-												<input type="text" name="app_name" placeholder="SWin Casino" value="SWin Casino" required>
+												<input type="text" name="app_name" placeholder="AddisWin Casino" value="AddisWin Casino" required>
 											</div>
 											<div class="information-form-group col-sm-6">
 												<label>Developer / Brand Name</label>

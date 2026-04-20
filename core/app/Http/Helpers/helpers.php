@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 
 
 function systemDetails() {
-    $system['name']          = config('app.name', env('APP_NAME', 'SWin Casino'));
+    $system['name']          = config('app.name', env('APP_NAME', 'AddisWin Casino'));
     $system['version']       = '3.8';
     $system['build_version'] = '5.1.19';
     return $system;

@@ -1,6 +1,6 @@
-# SWin Casino — Enterprise Casino Platform
+# AddisWin Casino — Enterprise Casino Platform
 
-**SWin Casino** is a clean, production-ready, self-hosted online casino platform built on **Laravel 11** (PHP 8.2+). It ships with a rich admin dashboard, 20+ automated payment gateways, a multi-language manager, KYC verification, 2FA, and a plug-and-play game engine. All vendor-specific licensing hooks have been removed; the codebase is ready to white-label for any brand.
+**AddisWin Casino** is a clean, production-ready, self-hosted online casino platform built on **Laravel 11** (PHP 8.2+). It ships with a rich admin dashboard, 20+ automated payment gateways, a multi-language manager, KYC verification, 2FA, and a plug-and-play game engine. All vendor-specific licensing hooks have been removed; the codebase is ready to white-label for any brand.
 
 > **Developed by [Scoware](https://scoware.com)** · support@scoware.com
 
@@ -107,7 +107,7 @@ All brand identity is controlled via `.env` — no hardcoded strings anywhere in
 ```dotenv
 # ── Application Name ──────────────────────────────────────────────────────────
 # Shown in page titles, emails, the admin panel, and the installer.
-APP_NAME="SWin Casino"
+APP_NAME="AddisWin Casino"
 
 # ── Developer / Brand Identity ────────────────────────────────────────────────
 # Shown in admin panel footer, system info page, and notification emails.
@@ -125,7 +125,7 @@ APP_TIMEZONE=UTC
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=swin_casino
+DB_DATABASE=addiswin_casino
 DB_USERNAME=your_db_user
 DB_PASSWORD=your_db_password
 ```
@@ -135,7 +135,7 @@ DB_PASSWORD=your_db_password
 These global helper functions are available anywhere in the application:
 
 ```php
-config('app.name')         // → "SWin Casino"
+config('app.name')         // → "AddisWin Casino"
 config('app.brand_name')   // → "Scoware"
 config('app.brand_url')    // → "https://scoware.com"
 config('app.brand_email')  // → "support@scoware.com"
@@ -154,7 +154,7 @@ gs('site_name')  // site name from DB (set via admin General Settings panel)
 ## 📁 Directory Structure
 
 ```
-swin-casino/
+addiswin-casino/
 ├── assets/          # Publicly accessible compiled frontend assets (CSS, JS, images)
 ├── core/            # Main Laravel 11 application (should NOT be web-accessible directly)
 │   ├── app/         # Application logic (Controllers, Models, Middleware, Helpers)
@@ -256,7 +256,7 @@ Ensure `AllowOverride All` is set for your document root and `mod_rewrite` is en
 server {
     listen 80;
     server_name yourdomain.com;
-    root /var/www/swin-casino;
+    root /var/www/addiswin-casino;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
@@ -345,4 +345,4 @@ SMS providers (Twilio, Vonage, MessageBird, etc.) are configured via **Admin →
 - `APP_TIMEZONE` env var now respected as fallback in `config/app.php`
 - New global PHP helpers: `brandName()`, `brandUrl()`, `brandEmail()`
 - Admin system info page label updated from "ViserAdmin Version" to "Build Version"
-- All seeded branding (`site_name`, `email_from`, `email_from_name`, policy page text) updated to SWin Casino / Scoware
+- All seeded branding (`site_name`, `email_from`, `email_from_name`, policy page text) updated to AddisWin Casino / Scoware

@@ -1,4 +1,4 @@
-name: Deploy SWin Casino
+name: Deploy AddisWin Casino
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      APP_URL: https://swin.scoware.com
+      APP_URL: https://addiswin.scoware.com
       DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
       DEPLOY_INSTALLER: ${{ secrets.DEPLOY_INSTALLER || 'false' }}
 
@@ -73,7 +73,7 @@ jobs:
 
       # ==================== DEPLOYMENT ====================
 
-      - name: Deploy SWin Casino application
+      - name: Deploy AddisWin Casino application
         run: |
           set -euo pipefail
 
@@ -255,7 +255,7 @@ jobs:
       - name: Notify deployment success
         if: success()
         run: |
-          echo "✓ SWin Casino deployed successfully to ${{ env.APP_URL }}"
+          echo "✓ AddisWin Casino deployed successfully to ${{ env.APP_URL }}"
           echo "✓ Application URL: ${{ env.APP_URL }}"
 
       - name: Notify deployment failure
