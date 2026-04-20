@@ -44,11 +44,18 @@
     }
     $dirs = ['../core/bootstrap/cache/', '../core/storage/', '../core/storage/app/', '../core/storage/framework/', '../core/storage/logs/'];
     foreach ($dirs as $dir) {
-        $perm = substr(sprintf('%o', fileperms($dir)), -4);
-        if ($perm >= '0775') {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        if (is_dir($dir)) {
+            @chmod($dir, 0775);
+        }
+        $rawPerms = fileperms($dir);
+        $perm     = $rawPerms !== false ? substr(sprintf('%o', $rawPerms), -4) : '0';
+        if ($rawPerms !== false && octdec($perm) >= octdec('0775')) {
             $passed[] = str_replace("../", "", $dir) . ' is required 0775 permission';
         } else {
-            $failed[] = str_replace("../", "", $dir) . ' is required 0775 permission. Current Permisiion is ' . $perm;
+            $failed[] = str_replace("../", "", $dir) . ' is required 0775 permission. Current Permission is ' . $perm;
         }
     }
     if (file_exists('database.sql')) {
