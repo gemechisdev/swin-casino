@@ -124,11 +124,13 @@ jobs:
 
           # Seed all default/bundled asset directories that are excluded from the
           # main rsync (to avoid overwriting admin-uploaded content on updates).
-          # --ignore-existing means files already on the server are never
-          # overwritten, so uploaded images/logos are always preserved.
-          # A single rsync pass covers the entire assets/images/ tree and the
-          # admin profile-images folder, then a second pass covers audio files
-          # (belt-and-suspenders in case audio was previously excluded).
+          # --checksum compares file content (SHA checksum) rather than just
+          # mtime/size: files that are identical to the repo are skipped, while
+          # files whose checksum has changed (developer updated the asset) are
+          # updated even if a file with the same name already exists on the
+          # server.  Purely user-generated files (no repo counterpart) are
+          # never touched because rsync only acts on paths present in the
+          # source.
           # Exclude user-generated-only dirs (no default content in repo) so
           # they are never accidentally wiped or created empty on the remote.
           SEED_EXCLUDES=(
@@ -138,18 +140,18 @@ jobs:
             --exclude='push_notification/'
           )
 
-          rsync -avz --ignore-existing \
+          rsync -avz --checksum \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             "${SEED_EXCLUDES[@]}" \
             ./assets/images/ \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/images/
 
-          rsync -avz --ignore-existing \
+          rsync -avz --checksum \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             ./assets/admin/images/profile/ \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/admin/images/profile/
 
-          rsync -avz --ignore-existing \
+          rsync -avz --checksum \
             -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
             ./assets/audio/ \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/audio/
