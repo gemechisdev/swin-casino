@@ -216,6 +216,21 @@ CREATE TABLE `deposits` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `etb_verifier_references`
+--
+
+CREATE TABLE `etb_verifier_references` (
+  `id` bigint UNSIGNED NOT NULL,
+  `reference` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` int UNSIGNED NOT NULL DEFAULT '0',
+  `deposit_id` bigint UNSIGNED NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `device_tokens`
 --
 
@@ -594,7 +609,8 @@ INSERT INTO `gateways` (`id`, `form_id`, `code`, `name`, `alias`, `image`, `stat
 (56, 0, 510, 'Binance', 'Binance', '664d9f879a11b1716363143.png', 1, '{\"api_key\":{\"title\":\"API Key\",\"global\":true,\"value\":\"tsu3tjiq0oqfbtmlbevoeraxhfbp3brejnm9txhjxcp4to29ujvakvfl1ibsn3ja\"},\"secret_key\":{\"title\":\"Secret Key\",\"global\":true,\"value\":\"jzngq4t04ltw8d4iqpi7admfl8tvnpehxnmi34id1zvfaenbwwvsvw7llw3zdko8\"},\"merchant_id\":{\"title\":\"Merchant ID\",\"global\":true,\"value\":\"231129033\"}}', '{\"BTC\":\"Bitcoin\",\"USD\":\"USD\",\"BNB\":\"BNB\"}', 1, '{\"cron\":{\"title\": \"Cron Job URL\",\"value\":\"ipn.Binance\"}}', NULL, NULL, '2024-05-22 01:32:23'),
 (57, 0, 124, 'SslCommerz', 'SslCommerz', '663a397a70c571715091834.png', 1, '{\"store_id\":{\"title\":\"Store ID\",\"global\":true,\"value\":\"---------\"},\"store_password\":{\"title\":\"Store Password\",\"global\":true,\"value\":\"----------\"}}', '{\"BDT\":\"BDT\",\"USD\":\"USD\",\"EUR\":\"EUR\",\"SGD\":\"SGD\",\"INR\":\"INR\",\"MYR\":\"MYR\"}', 0, NULL, NULL, NULL, '2024-05-07 02:23:54'),
 (58, 0, 125, 'Aamarpay', 'Aamarpay', '664d9f3f08eaa1716363071.png', 1, '{\"store_id\":{\"title\":\"Store ID\",\"global\":true,\"value\":\"---------\"},\"signature_key\":{\"title\":\"Signature Key\",\"global\":true,\"value\":\"----------\"}}', '{\"BDT\":\"BDT\"}', 0, NULL, NULL, NULL, '2024-05-22 01:31:11'),
-(59, 0, 126, 'bKash', 'BKash', '68088c3959cca1745390649.png', 1, '{\"username\":{\"title\":\"Username\",\"global\":true,\"value\":\"------------------------\"},\"password\":{\"title\":\"Password\",\"global\":true,\"value\":\"--------------------------\"},\"app_key\":{\"title\":\"App Key\",\"global\":true,\"value\":\"---------------------\"},\"app_secret\":{\"title\":\"App Secret\",\"global\":true,\"value\":\"---------------------\"}}', '{\"BDT\":\"BDT\"}', 0, NULL, NULL, NULL, '2025-04-23 00:44:10');
+(59, 0, 126, 'bKash', 'BKash', '68088c3959cca1745390649.png', 1, '{\"username\":{\"title\":\"Username\",\"global\":true,\"value\":\"------------------------\"},\"password\":{\"title\":\"Password\",\"global\":true,\"value\":\"--------------------------\"},\"app_key\":{\"title\":\"App Key\",\"global\":true,\"value\":\"---------------------\"},\"app_secret\":{\"title\":\"App Secret\",\"global\":true,\"value\":\"---------------------\"}}', '{\"BDT\":\"BDT\"}', 0, NULL, NULL, NULL, '2025-04-23 00:44:10'),
+(60, 0, 127, 'ETB Verifier', 'EtbVerifier', 'default-method.png', 1, '{\"api_base\":{\"title\":\"API Base URL\",\"global\":true,\"value\":\"https:\\/\\/verifyapi.leulzenebe.pro\"},\"api_key\":{\"title\":\"API Key\",\"global\":true,\"value\":\"\"},\"telebirr_account\":{\"title\":\"Telebirr Account\",\"global\":true,\"value\":\"\"},\"cbe_account\":{\"title\":\"CBE Account\",\"global\":true,\"value\":\"\"}}', '{\"ETB\":\"ETB\"}', 0, NULL, NULL, NULL, '2026-04-21 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1191,6 +1207,13 @@ ALTER TABLE `deposits`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `etb_verifier_references`
+--
+ALTER TABLE `etb_verifier_references`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `etb_verifier_references_reference_unique` (`reference`);
+
+--
 -- Indexes for table `device_tokens`
 --
 ALTER TABLE `device_tokens`
@@ -1415,6 +1438,12 @@ ALTER TABLE `deposits`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `etb_verifier_references`
+--
+ALTER TABLE `etb_verifier_references`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `device_tokens`
 --
 ALTER TABLE `device_tokens`
@@ -1460,7 +1489,7 @@ ALTER TABLE `game_logs`
 -- AUTO_INCREMENT for table `gateways`
 --
 ALTER TABLE `gateways`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `gateway_currencies`
