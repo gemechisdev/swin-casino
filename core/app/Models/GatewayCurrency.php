@@ -51,6 +51,15 @@ class GatewayCurrency extends Model {
             return true;
         }
 
+        // Allow each gateway's ProcessController to define its own configuration check
+        $alias = $this->method->alias ?? null;
+        if ($alias && preg_match('/^\w+$/', $alias)) {
+            $processorClass = 'App\\Http\\Controllers\\Gateway\\' . $alias . '\\ProcessController';
+            if (class_exists($processorClass) && method_exists($processorClass, 'isConfigured')) {
+                return $processorClass::isConfigured($this);
+            }
+        }
+
         $requiredKeys = $this->requiredGatewayParamKeys();
         if (empty($requiredKeys)) {
             return true;

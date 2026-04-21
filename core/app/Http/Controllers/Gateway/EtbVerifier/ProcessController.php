@@ -17,6 +17,21 @@ class ProcessController extends Controller
     private const NAME_PREFIX_LENGTH = 4;
     private const NAME_SIMILARITY_THRESHOLD = 80;
 
+    public static function isConfigured(\App\Models\GatewayCurrency $gatewayCurrency): bool
+    {
+        $params = json_decode($gatewayCurrency->gateway_parameter ?? '{}') ?: new \stdClass();
+        $apiKey = trim($params->api_key ?? '');
+
+        if (!$apiKey) {
+            return false;
+        }
+
+        $hasTelebirr = !empty(trim($params->telebirr_account ?? ''));
+        $hasCbe      = !empty(trim($params->cbe_account ?? ''));
+
+        return $hasTelebirr || $hasCbe;
+    }
+
     public static function process($deposit)
     {
         $alias     = $deposit->gateway->alias;
