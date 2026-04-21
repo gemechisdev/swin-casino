@@ -59,8 +59,8 @@ class GameController extends Controller
         ]);
 
         $game = Game::findOrFail($id);
-        $houseEdge = $this->normalizeHouseEdge($request->house_edge, 5);
-        $houseEdgeDemo = $this->normalizeHouseEdge($request->house_edge_demo, 2);
+        $houseEdge = $this->sanitizeHouseEdge($request->house_edge, 5);
+        $houseEdgeDemo = $this->sanitizeHouseEdge($request->house_edge_demo, 2);
         $winChance = $this->calculateProbableWin($game, $houseEdge, $request, $game->probable_win);
         $winChanceDemo = $this->calculateProbableWin($game, $houseEdgeDemo, $request, $game->probable_win_demo);
 
@@ -190,8 +190,8 @@ class GameController extends Controller
         }
         $levels['levels'] = $level;
         $levels           = array_merge($maxSelect, $levels);
-        $houseEdge = $this->normalizeHouseEdge($request->house_edge, 5);
-        $houseEdgeDemo = $this->normalizeHouseEdge($request->house_edge_demo, 2);
+        $houseEdge = $this->sanitizeHouseEdge($request->house_edge, 5);
+        $houseEdgeDemo = $this->sanitizeHouseEdge($request->house_edge_demo, 2);
 
         $game->name              = $request->name;
         $game->min_limit         = $request->min;
@@ -237,8 +237,8 @@ class GameController extends Controller
         ]);
 
         $game = Game::findOrFail($id);
-        $houseEdge = $this->normalizeHouseEdge($request->house_edge, 5);
-        $houseEdgeDemo = $this->normalizeHouseEdge($request->house_edge_demo, 2);
+        $houseEdge = $this->sanitizeHouseEdge($request->house_edge, 5);
+        $houseEdgeDemo = $this->sanitizeHouseEdge($request->house_edge_demo, 2);
         $probableWin = $this->calculateCrazyTimesProbableWin($houseEdge, $request->level);
         $probableWinDemo = $this->calculateCrazyTimesProbableWin($houseEdgeDemo, $request->level);
 
@@ -285,8 +285,8 @@ class GameController extends Controller
             'house_edge.required' => 'House edge field is required',
         ]);
 
-        $houseEdge = $this->normalizeHouseEdge($request->house_edge, 5);
-        $houseEdgeDemo = $this->normalizeHouseEdge($request->house_edge_demo, 2);
+        $houseEdge = $this->sanitizeHouseEdge($request->house_edge, 5);
+        $houseEdgeDemo = $this->sanitizeHouseEdge($request->house_edge_demo, 2);
         $game                    = Game::findOrFail($id);
         $probableWin = $this->calculateDreamCatcherProbableWin($houseEdge, $game->probable_win);
         $probableWinDemo = $this->calculateDreamCatcherProbableWin($houseEdgeDemo, $game->probable_win_demo);
@@ -317,7 +317,7 @@ class GameController extends Controller
         return back()->withNotify($notify);
     }
 
-    private function normalizeHouseEdge($value, $default)
+    private function sanitizeHouseEdge($value, $default)
     {
         $edge = is_numeric($value) ? (float) $value : $default;
         $edge = max(0, min($edge, 99.99));
@@ -339,7 +339,7 @@ class GameController extends Controller
     {
         $multiplier = ($investBack == Status::YES ? 1 : 0) + (max((float) $winPercent, 0) / 100);
         if ($multiplier <= 0) {
-            return 0;
+            return round(max(0, min(100 - $houseEdge, 100)), 2);
         }
 
         return round(max(0, min(((100 - $houseEdge) / $multiplier), 100)), 2);
@@ -376,8 +376,8 @@ class GameController extends Controller
             'ten'    => round((100 - $houseEdge) / 11, 2),
             'twenty' => round((100 - $houseEdge) / 21, 2),
             'forty'  => round((100 - $houseEdge) / 41, 2),
-            'twox'   => (float) (@$existingProbable->twox ?? 0),
-            'sevenx' => (float) (@$existingProbable->sevenx ?? 0),
+            'twox'   => (float) ($existingProbable->twox ?? 0),
+            'sevenx' => (float) ($existingProbable->sevenx ?? 0),
         ];
 
         foreach (['one', 'two', 'five', 'ten', 'twenty', 'forty'] as $key) {

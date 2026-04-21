@@ -43,7 +43,7 @@ class Roulette extends Game
         }
 
         $houseEdge = $this->demoPlay ? $this->game->house_edge_demo : $this->game->house_edge;
-        $random = rand(0, 36);
+        $random = mt_rand(1, 36);
         if (in_array($random, $numbers)) {
             $win = Status::WIN;
         } else {

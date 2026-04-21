@@ -161,6 +161,14 @@ class BlackJack extends Game
         $probableWin = $this->demoPlay ? $this->game->probable_win_demo : $this->game->probable_win;
         $random = mt_rand(0, 10000) / 100;
 
+        if ($userSum <= 21 && $dealerSum <= 21) {
+            if ($random <= $probableWin && $userSum <= $dealerSum) {
+                $dealerSum = max($userSum - 1, 0);
+            } elseif ($random > $probableWin && $userSum >= $dealerSum) {
+                $dealerSum = min($userSum + 1, 21);
+            }
+        }
+
         if ($userSum > 21) {
             $gameLog->win_status = Status::LOSS;
             $winStatus           = 'Loss';
@@ -170,14 +178,12 @@ class BlackJack extends Game
         } else if ($userSum == $dealerSum) {
             $gameLog->win_status = Status::WIN;
             $winStatus           = 'Tie';
+        } else if ($userSum > $dealerSum) {
+            $gameLog->win_status = Status::WIN;
+            $winStatus           = 'Win';
         } else {
-            if ($random <= $probableWin) {
-                $gameLog->win_status = Status::WIN;
-                $winStatus           = 'Win';
-            } else {
-                $gameLog->win_status = Status::LOSS;
-                $winStatus           = 'Loss';
-            }
+            $gameLog->win_status = Status::LOSS;
+            $winStatus           = 'Loss';
         }
         $gameLog->save();
 
