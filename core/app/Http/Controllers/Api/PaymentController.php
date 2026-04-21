@@ -16,9 +16,14 @@ class PaymentController extends Controller
 {
     public function methods()
     {
-        $gatewayCurrency = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE);
-        })->with('method')->orderby('name')->get();
+        $gatewayCurrency = GatewayCurrency::activeForDeposit()
+            ->with('method')
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($gatewayCurrency) {
+                return $gatewayCurrency->isConfiguredForDeposit();
+            })
+            ->values();
         $notify[] = 'Payment Methods';
         return responseSuccess('deposit_methods', $notify, [
             'methods' => $gatewayCurrency,
@@ -39,9 +44,14 @@ class PaymentController extends Controller
         }
 
         $user = auth()->user();
-        $gate = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE);
-        })->where('method_code', $request->method_code)->where('currency', $request->currency)->first();
+        $gate = GatewayCurrency::activeForDeposit()
+            ->with('method')
+            ->where('method_code', $request->method_code)
+            ->get()
+            ->first(function ($gatewayCurrency) use ($request) {
+                return strcasecmp((string) $gatewayCurrency->currency, (string) $request->currency) === 0
+                    && $gatewayCurrency->isConfiguredForDeposit();
+            });
         if (!$gate) {
             $notify[] = 'Invalid gateway';
             return responseError('invalid_gateway', $notify);

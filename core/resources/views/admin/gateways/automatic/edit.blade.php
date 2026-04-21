@@ -297,7 +297,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label>@lang('Symbol')</label>
-                                                            <input disabled type="text" name="currency[{{ $currencyIndex }}][symbol]" class="form-control border-radius-5 symbl" ata-crypto="{{ $gateway->crypto }}" disabled>
+                                                            <input disabled type="text" name="currency[{{ $currencyIndex }}][symbol]" class="form-control border-radius-5 symbl" data-crypto="{{ $gateway->crypto }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -376,10 +376,14 @@
                 if (!getCurrencySelected) return;
                 form.find('input').removeAttr('disabled');
                 var symbol = $('.newCurrencyVal').find(':selected').data('symbol');
+                var gatewayName = $(this).data('name');
                 form.find('.currencyText').val(getCurrencySelected);
+                form.find('input[name*="[name]"]').val(`${gatewayName} - ${getCurrencySelected}`);
+                form.find('input[name*="[symbol]"]').val(symbol || currency);
                 form.find('.currency_symbol').text(currency);
-                $('#payment_currency_name').text(`${$(this).data('name')} - ${getCurrencySelected}`);
+                $('#payment_currency_name').text(`${gatewayName} - ${getCurrencySelected}`);
                 form.removeClass('d-none');
+                $('.newCurrencyVal').val('');
                 $('html, body').animate({
                     scrollTop: $('html, body').height()
                 }, 'slow');

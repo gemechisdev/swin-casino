@@ -11,7 +11,7 @@
                             <div class="card custom--card">
                                 <div class="card-body p-0">
                                     <div class="payment-system-list is-scrollable gateway-option-list">
-                                        @foreach ($gatewayCurrency as $data)
+                                        @forelse ($gatewayCurrency as $data)
                                             <label for="{{ titleToKey($data->name) }}"
                                                 class="payment-item @if ($loop->index > 4) d-none @endif gateway-option">
                                                 <div class="payment-item__info">
@@ -27,11 +27,15 @@
                                                     id="{{ titleToKey($data->name) }}" hidden
                                                     data-gateway='@json($data)' type="radio"
                                                     name="gateway" value="{{ $data->method_code }}"
-                                                    @checked(old('method_code', $loop->first) == $data->id)
+                                                    @checked(old('gateway', $loop->first ? $data->method_code : null) == $data->method_code)
                                                     data-min-amount="{{ showAmount($data->min_amount) }}"
                                                     data-max-amount="{{ showAmount($data->max_amount) }}">
                                             </label>
-                                        @endforeach
+                                        @empty
+                                            <div class="p-3">
+                                                <p class="text mb-0 text-muted">@lang('No payment methods are currently available.')</p>
+                                            </div>
+                                        @endforelse
                                         @if ($gatewayCurrency->count() > 4)
                                             <button type="button" class="payment-item__btn more-gateway-option">
                                                 <p class="payment-item__btn-text">@lang('Show All Payment Options')</p>
@@ -47,6 +51,11 @@
                             <div class="card custom--card">
                                 <div class="card-body p-0">
                                     <div class="payment-system-list p-3">
+                                        @if ($gatewayCurrency->isEmpty())
+                                            <div class="alert alert-warning mb-3" role="alert">
+                                                @lang('No active and configured payment gateway is available right now. Please contact support or configure one from admin.')
+                                            </div>
+                                        @endif
                                         <div class="deposit-info">
                                             <div class="deposit-info__title">
                                                 <p class="text mb-0">@lang('Amount')</p>
@@ -56,7 +65,8 @@
                                                     <span class="deposit-info__input-group-text">{{ gs('cur_sym') }}</span>
                                                     <input type="text" class="form-control form--control amount"
                                                         name="amount" placeholder="@lang('00.00')"
-                                                        value="{{ old('amount') }}" autocomplete="off">
+                                                        value="{{ old('amount') }}" autocomplete="off"
+                                                        @disabled($gatewayCurrency->isEmpty())>
                                                 </div>
                                             </div>
                                         </div>
@@ -177,7 +187,10 @@
 
             function gatewayChange() {
                 let gatewayElement = $('.gateway-input:checked');
-                let methodCode = gatewayElement.val();
+                if (!gatewayElement.length) {
+                    gateway = null;
+                    return;
+                }
 
                 gateway = gatewayElement.data('gateway');
                 minAmount = gatewayElement.data('min-amount');
@@ -254,7 +267,9 @@
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             })
-            $('.gateway-input').change();
+            if ($('.gateway-input').length) {
+                $('.gateway-input').first().trigger('change');
+            }
         })(jQuery);
     </script>
 @endpush

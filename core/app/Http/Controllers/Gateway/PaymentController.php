@@ -14,9 +14,14 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller {
     public function deposit() {
-        $gatewayCurrency = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE);
-        })->with('method')->orderby('name')->get();
+        $gatewayCurrency = GatewayCurrency::activeForDeposit()
+            ->with('method')
+            ->orderBy('name')
+            ->get()
+            ->filter(function ($gatewayCurrency) {
+                return $gatewayCurrency->isConfiguredForDeposit();
+            })
+            ->values();
         $pageTitle = 'Deposit Methods';
         return view('Template::user.payment.deposit', compact('gatewayCurrency', 'pageTitle'));
     }
@@ -29,9 +34,14 @@ class PaymentController extends Controller {
         ]);
 
         $user = auth()->user();
-        $gate = GatewayCurrency::whereHas('method', function ($gate) {
-            $gate->where('status', Status::ENABLE);
-        })->where('method_code', $request->gateway)->where('currency', $request->currency)->first();
+        $gate = GatewayCurrency::activeForDeposit()
+            ->with('method')
+            ->where('method_code', $request->gateway)
+            ->get()
+            ->first(function ($gatewayCurrency) use ($request) {
+                return strcasecmp((string) $gatewayCurrency->currency, (string) $request->currency) === 0
+                    && $gatewayCurrency->isConfiguredForDeposit();
+            });
         if (!$gate) {
             $notify[] = ['error', 'Invalid gateway'];
             return back()->withNotify($notify);
