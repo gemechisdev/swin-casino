@@ -30,7 +30,7 @@
                                 </div>
 
                                 <div class="form-group mb-3">
-                                    <label class="form-label">@lang('Telebirr Number (optional for MP references)')</label>
+                                    <label class="form-label">@lang('Telebirr Number (optional when payment is made via Telebirr)')</label>
                                     <input type="text" class="form-control form--control" name="payer_telebirr_no" value="{{ old('payer_telebirr_no') }}">
                                 </div>
 
@@ -48,4 +48,3 @@
         </div>
     </div>
 @endsection
-

@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Schema;
 
 class ProcessController extends Controller
 {
+    private const ACCOUNT_TAIL_DIGITS = 4;
+    private const NAME_PREFIX_LENGTH = 4;
+    private const NAME_SIMILARITY_THRESHOLD = 80;
+
     public static function process($deposit)
     {
         $alias          = $deposit->gateway->alias;
@@ -79,7 +83,7 @@ class ProcessController extends Controller
                 }
                 return back()->withNotify($notify);
             }
-            $payload['accountSuffix'] = $this->deriveCbeAccountSuffix($payerCbeAccount);
+            $payload['accountSuffix'] = $this->getCbeAccountSuffixDigits($payerCbeAccount);
         }
 
         try {
@@ -131,7 +135,7 @@ class ProcessController extends Controller
 
             $apiPayerName = $decoded['payer'] ?? '';
             if (!$this->namesMatch($payerName, $apiPayerName)) {
-                $notify[] = ['error', 'Name on payment doesn’t match your registered name.'];
+                $notify[] = ['error', 'Submitted payer name does not match the name on the payment.'];
                 if ($apiRequest) {
                     return responseError('name_mismatch', $notify);
                 }
@@ -162,7 +166,7 @@ class ProcessController extends Controller
 
             $apiPayerName = $teleData['payerName'] ?? '';
             if (!$this->namesMatch($payerName, $apiPayerName)) {
-                $notify[] = ['error', 'Name on payment doesn’t match your registered name.'];
+                $notify[] = ['error', 'Submitted payer name does not match the name on the payment.'];
                 if ($apiRequest) {
                     return responseError('name_mismatch', $notify);
                 }
@@ -208,7 +212,7 @@ class ProcessController extends Controller
         return redirect($deposit->success_url)->withNotify($notify);
     }
 
-    private function deriveCbeAccountSuffix(string $account): string
+    private function getCbeAccountSuffixDigits(string $account): string
     {
         $numericOnly = preg_replace('/\D+/', '', $account);
         return strlen($numericOnly) >= 8 ? substr($numericOnly, -8) : $numericOnly;
@@ -220,27 +224,37 @@ class ProcessController extends Controller
         if (!$storedNumeric) {
             return false;
         }
-        $storedTail = strlen($storedNumeric) >= 4 ? substr($storedNumeric, -4) : $storedNumeric;
+        $storedTail = strlen($storedNumeric) >= self::ACCOUNT_TAIL_DIGITS ? substr($storedNumeric, -self::ACCOUNT_TAIL_DIGITS) : $storedNumeric;
         preg_match('/(\d+)\s*$/', $apiAccount, $match);
         $apiTailDigits = $match[1] ?? '';
         if (!$apiTailDigits) {
             return false;
         }
-        $apiTail = strlen($apiTailDigits) >= 4 ? substr($apiTailDigits, -4) : $apiTailDigits;
+        $apiTail = strlen($apiTailDigits) >= self::ACCOUNT_TAIL_DIGITS ? substr($apiTailDigits, -self::ACCOUNT_TAIL_DIGITS) : $apiTailDigits;
         return $storedTail === $apiTail;
     }
 
     private function namesMatch(string $registeredName, string $apiName): bool
     {
         $normalize = function ($name) {
-            return strtolower(preg_replace('/\s+/', '', trim((string) $name)));
+            $cleaned = preg_replace('/[^a-z0-9]/i', '', trim((string) $name));
+            return strtolower($cleaned);
         };
         $a = $normalize($registeredName);
         $b = $normalize($apiName);
         if (!$a || !$b) {
             return false;
         }
-        return substr($a, 0, 4) === substr($b, 0, 4);
+        if ($a === $b) {
+            return true;
+        }
+
+        if (strlen($a) < self::NAME_PREFIX_LENGTH || strlen($b) < self::NAME_PREFIX_LENGTH || substr($a, 0, self::NAME_PREFIX_LENGTH) !== substr($b, 0, self::NAME_PREFIX_LENGTH)) {
+            return false;
+        }
+
+        similar_text($a, $b, $similarity);
+        return $similarity >= self::NAME_SIMILARITY_THRESHOLD;
     }
 
     private function parseAmount($amount): float
