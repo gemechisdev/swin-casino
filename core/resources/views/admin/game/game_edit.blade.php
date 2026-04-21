@@ -26,20 +26,33 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label>@lang('Winning Chance')</label>
+                            <label>@lang('House Edge (%)')</label>
                             <div class="input-group mb-3">
-                                <input class="form-control" name="probable" type="number"
-                                    value="{{ getAmount($game->probable_win) }}" placeholder="@lang('Winning Chance')">
+                                <input class="form-control house-edge-input" name="house_edge" type="number"
+                                    id="house_edge"
+                                    value="{{ $game->house_edge ?? 5 }}" step="0.01" min="0" max="100"
+                                    placeholder="@lang('House Edge %')">
                                 <span class="input-group-text" id="basic-addon2">@lang('%')</span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>@lang('Winning Chance For Demo')</label>
+                            <label>@lang('Demo House Edge (%)')</label>
                             <div class="input-group mb-3">
-                                <input class="form-control" name="probable_demo" type="number"
-                                    value="{{ getAmount($game->probable_win_demo) }}" placeholder="@lang('Winning Chance For Demo')">
+                                <input class="form-control house-edge-demo-input" name="house_edge_demo" type="number"
+                                    id="house_edge_demo"
+                                    value="{{ $game->house_edge_demo ?? 2 }}" step="0.01" min="0" max="100"
+                                    placeholder="@lang('Demo House Edge %')">
                                 <span class="input-group-text" id="basic-addon2">@lang('%')</span>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@lang('Winning Chance (%)')</label>
+                            <div class="input-group mb-3">
+                                <input class="form-control" id="win_chance_display" type="text" readonly
+                                    value="{{ $game->probable_win ?? 'Auto' }}" placeholder="@lang('Auto-calculated')">
+                                <span class="input-group-text">@lang('%') @lang('(read-only)')</span>
+                            </div>
+                            <small class="text-muted">@lang('Effective Win Rate: auto-calculated from House Edge')</small>
                         </div>
                         @if ($game->alias != 'color_prediction')
                             <div class="form-group">
@@ -143,4 +156,31 @@
 
 @push('breadcrumb-plugins')
     <x-back route="{{ route('admin.game.index') }}" />
+@endpush
+
+@push('script')
+<script>
+(function($) {
+    "use strict";
+    function updateWinRate() {
+        var he = parseFloat($('#house_edge').val()) || 0;
+        var win = parseFloat($('[name="win"]').val()) || 0;
+        var investBack = $('[name="invest_back"]').is(':checked') || $('[name="invest_back"]').val() == '1';
+        var rate = 0;
+        if (win > 0) {
+            if (investBack) {
+                rate = ((100 - he) / (1 + win / 100)).toFixed(2);
+            } else {
+                rate = ((100 - he) * 100 / win).toFixed(2);
+            }
+        } else {
+            rate = (100 - he).toFixed(2);
+        }
+        rate = Math.min(99.99, Math.max(0, rate));
+        $('#win_chance_display').val('Effective Win Rate: ' + rate + '%');
+    }
+    $('#house_edge, #house_edge_demo, [name="win"]').on('input change', updateWinRate);
+    updateWinRate();
+})(jQuery);
+</script>
 @endpush

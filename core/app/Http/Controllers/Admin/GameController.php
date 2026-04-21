@@ -40,19 +40,19 @@ class GameController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name'          => 'required',
-            'min'           => 'required|numeric',
-            'max'           => 'required|numeric',
-            'instruction'   => 'required',
-            'win'           => 'sometimes|required|numeric',
-            'invest_back'   => 'sometimes|required',
-            'trending'      => 'sometimes|required',
-            'featured'      => 'sometimes|required',
-            'probable'      => 'nullable|integer|max:100',
-            'probable_demo' => 'nullable|integer|max:100',
-            'level.*'       => 'sometimes|required',
-            'chance.*'      => 'sometimes|required|numeric',
-            'image'         => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+            'name'            => 'required',
+            'min'             => 'required|numeric',
+            'max'             => 'required|numeric',
+            'instruction'     => 'required',
+            'win'             => 'sometimes|required|numeric',
+            'invest_back'     => 'sometimes|required',
+            'trending'        => 'sometimes|required',
+            'featured'        => 'sometimes|required',
+            'house_edge'      => 'nullable|numeric|min:0|max:100',
+            'house_edge_demo' => 'nullable|numeric|min:0|max:100',
+            'level.*'         => 'sometimes|required',
+            'chance.*'        => 'sometimes|required|numeric',
+            'image'           => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
         ], [
             'level.0.required'  => 'Level 1 field is required',
             'level.1.required'  => 'Level 2 field is required',
@@ -63,27 +63,33 @@ class GameController extends Controller
             'chance.3.required' => 'Triple win field is required',
             'chance.*.numeric'  => 'Chance field must be a number',
         ]);
-        $winChance     = $request->probable;
-        $winChanceDemo = $request->probable_demo;
-
-        if (isset($request->chance)) {
-
-            if (array_sum($request->chance) != 100) {
-                $notify[] = ['error', 'The sum of winning chance must be equal of 100'];
-                return back()->withNotify($notify);
-            }
-
-            $winChance     = $request->chance;
-            $winChanceDemo = $request->chance;
-        }
 
         $game = Game::findOrFail($id);
+
+        $houseEdge     = $request->house_edge ?? 5.00;
+        $houseEdgeDemo = $request->house_edge_demo ?? 2.00;
+
+        $investBack = $request->invest_back ? true : false;
+        $win        = (float) ($request->win ?? 0);
+
+        if (isset($request->chance)) {
+            // NumberSlot: chance[] array – compute proportionally from house_edge
+            $levels = $request->level ?? [100, 200, 500];
+
+            $winChance     = $this->calculateNumberSlotChances($houseEdge, $levels);
+            $winChanceDemo = $this->calculateNumberSlotChances($houseEdgeDemo, $levels);
+        } else {
+            $winChance     = $this->calculateProbableWin($houseEdge, $win, $investBack);
+            $winChanceDemo = $this->calculateProbableWin($houseEdgeDemo, $win, $investBack);
+        }
 
         $game->name              = $request->name;
         $game->min_limit         = $request->min;
         $game->max_limit         = $request->max;
         $game->probable_win      = $winChance;
         $game->probable_win_demo = $winChanceDemo;
+        $game->house_edge        = $houseEdge;
+        $game->house_edge_demo   = $houseEdgeDemo;
         $game->invest_back       = $request->invest_back ? Status::YES : Status::NO;
         $game->trending          = $request->trending ? Status::YES : Status::NO;
         $game->featured          = $request->featured ? Status::YES : Status::NO;
@@ -182,8 +188,8 @@ class GameController extends Controller
             'max_select_number' => 'required|integer|gte:4',
             'level.*'           => 'required|integer',
             'percent.*'         => 'required|numeric',
-            'probable'          => 'required|integer|min:0|max:100',
-            'probable_demo'     => 'required|integer|min:0|max:100',
+            'house_edge'        => 'nullable|numeric|min:0|max:100',
+            'house_edge_demo'   => 'nullable|numeric|min:0|max:100',
             'image'             => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
         ], [
             'level.*.required'   => 'Level field is required',
@@ -204,6 +210,16 @@ class GameController extends Controller
         $levels['levels'] = $level;
         $levels           = array_merge($maxSelect, $levels);
 
+        $houseEdge     = $request->house_edge ?? 5.00;
+        $houseEdgeDemo = $request->house_edge_demo ?? 2.00;
+
+        $avgCommission = count($request->percent) > 0
+            ? array_sum($request->percent) / count($request->percent)
+            : 100;
+
+        $winChance     = $this->calculateProbableWin($houseEdge, $avgCommission, true);
+        $winChanceDemo = $this->calculateProbableWin($houseEdgeDemo, $avgCommission, true);
+
         $game->name              = $request->name;
         $game->min_limit         = $request->min;
         $game->max_limit         = $request->max;
@@ -212,8 +228,10 @@ class GameController extends Controller
         $game->featured          = $request->featured ? Status::YES : Status::NO;
         $game->instruction       = $request->instruction;
         $game->level             = $levels;
-        $game->probable_win      = $request->probable;
-        $game->probable_win_demo = $request->probable_demo;
+        $game->probable_win      = $winChance;
+        $game->probable_win_demo = $winChanceDemo;
+        $game->house_edge        = $houseEdge;
+        $game->house_edge_demo   = $houseEdgeDemo;
 
         if ($request->hasFile('image')) {
             try {
@@ -231,21 +249,37 @@ class GameController extends Controller
     public function crazyTimesUpdate(Request $request, $id)
     {
         $request->validate([
-            'name'          => 'required',
-            'min'           => 'required|numeric',
-            'max'           => 'required|numeric',
-            'instruction'   => 'required',
-            'trending'      => 'sometimes|required',
-            'featured'      => 'sometimes|required',
-            'probable'      => 'required|integer|min:0|max:100',
-            'probable_demo' => 'required|integer|min:0|max:100',
-            'level.*'       => 'required|numeric|gte:0',
-            'image'         => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+            'name'            => 'required',
+            'min'             => 'required|numeric',
+            'max'             => 'required|numeric',
+            'instruction'     => 'required',
+            'trending'        => 'sometimes|required',
+            'featured'        => 'sometimes|required',
+            'house_edge'      => 'nullable|numeric|min:0|max:100',
+            'house_edge_demo' => 'nullable|numeric|min:0|max:100',
+            'level.*'         => 'required|numeric|gte:0',
+            'image'           => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
         ], [
             'level.*.required' => 'probable field is required',
         ]);
 
         $game = Game::findOrFail($id);
+
+        $houseEdge     = $request->house_edge ?? 5.00;
+        $houseEdgeDemo = $request->house_edge_demo ?? 2.00;
+
+        $levels = $request->level ?? [200, 300, 500, 1000];
+
+        // CrazyTimes average payout multiplier across all 8 bet types
+        // Fixed bets: 1→2x, 2→3x, 5→6x, 10→11x; special bets use level[]
+        $avgMultiplier = (2 + 3 + 6 + 11
+            + (1 + ($levels[0] ?? 200) / 100)
+            + (1 + ($levels[1] ?? 300) / 100)
+            + (1 + ($levels[2] ?? 500) / 100)
+            + (1 + ($levels[3] ?? 1000) / 100)) / 8;
+
+        $winChance     = min(99.99, round((100 - $houseEdge) / $avgMultiplier, 2));
+        $winChanceDemo = min(99.99, round((100 - $houseEdgeDemo) / $avgMultiplier, 2));
 
         $game->name              = $request->name;
         $game->min_limit         = $request->min;
@@ -254,8 +288,10 @@ class GameController extends Controller
         $game->trending          = $request->trending ? Status::YES : Status::NO;
         $game->featured          = $request->featured ? Status::YES : Status::NO;
         $game->instruction       = $request->instruction;
-        $game->probable_win      = $request->probable;
-        $game->probable_win_demo = $request->probable_demo;
+        $game->probable_win      = $winChance;
+        $game->probable_win_demo = $winChanceDemo;
+        $game->house_edge        = $houseEdge;
+        $game->house_edge_demo   = $houseEdgeDemo;
         $game->level             = $request->level;
 
         if ($request->hasFile('image')) {
@@ -275,28 +311,27 @@ class GameController extends Controller
     public function dreamCatcherUpdate(Request $request, $id)
     {
         $request->validate([
-            'name'         => 'required',
-            'min'          => 'required|numeric',
-            'max'          => 'required|numeric',
-            'instruction'  => 'required',
-            'trending'     => 'sometimes|required',
-            'featured'     => 'sometimes|required',
-            'probable_win' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
-                if (array_sum($value) != 100) {
-                    $fail('The total sum of win probability is must be 100.');
-                }
-            }],
-            'probable_win.*'    => 'required|numeric|gt:0|lte:100',
-            'probable_win_demo' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
-                if (array_sum($value) != 100) {
-                    $fail('The total sum of demo win probability is must be 100.');
-                }
-            }],
-            'probable_win_demo.*' => 'required|numeric|gt:0|lte:100',
-            'image'               => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
-        ], [
-            'probable_win.*.required' => 'Probable field is required',
+            'name'            => 'required',
+            'min'             => 'required|numeric',
+            'max'             => 'required|numeric',
+            'instruction'     => 'required',
+            'trending'        => 'sometimes|required',
+            'featured'        => 'sometimes|required',
+            'house_edge'      => 'nullable|numeric|min:0|max:100',
+            'house_edge_demo' => 'nullable|numeric|min:0|max:100',
+            'image'           => ['nullable', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
         ]);
+
+        $houseEdge     = $request->house_edge ?? 5.00;
+        $houseEdgeDemo = $request->house_edge_demo ?? 2.00;
+
+        // Each DreamCatcher segment has an independent win probability.
+        // Total payout per segment = multiplier * invest + invest (invest returned on win).
+        // RTP per bet = prob * (multiplier + 1) = (100 - house_edge) / 100
+        // => prob = (100 - house_edge) / (multiplier + 1)
+        $probableWin     = $this->calculateDreamCatcherProbabilities($houseEdge);
+        $probableWinDemo = $this->calculateDreamCatcherProbabilities($houseEdgeDemo);
+
         $game                    = Game::findOrFail($id);
         $game->name              = $request->name;
         $game->min_limit         = $request->min;
@@ -305,9 +340,11 @@ class GameController extends Controller
         $game->trending          = $request->trending ? Status::YES : Status::NO;
         $game->featured          = $request->featured ? Status::YES : Status::NO;
         $game->instruction       = $request->instruction;
-        $game->probable_win      = $request->probable_win;
-        $game->probable_win_demo = $request->probable_win_demo;
-        
+        $game->probable_win      = $probableWin;
+        $game->probable_win_demo = $probableWinDemo;
+        $game->house_edge        = $houseEdge;
+        $game->house_edge_demo   = $houseEdgeDemo;
+
         if ($request->hasFile('image')) {
             try {
                 $game->image = fileUploader($request->image, getFilePath('game'), getFileSize('game'), @$game->image);
@@ -321,5 +358,90 @@ class GameController extends Controller
 
         $notify[] = ['success', 'Game updated successfully'];
         return back()->withNotify($notify);
+    }
+
+    /**
+     * Calculate probable_win from house_edge for simple fixed-payout games.
+     *
+     * @param float $houseEdge  House edge percentage (0-100)
+     * @param float $win        Win bonus percentage stored in game->win
+     * @param bool  $investBack Whether the original invest is returned on win
+     * @return float            Winning probability (0-100)
+     */
+    private function calculateProbableWin(float $houseEdge, float $win, bool $investBack): float
+    {
+        $rtp = (100 - $houseEdge) / 100;
+
+        if ($win <= 0) {
+            return round($rtp * 100, 2);
+        }
+
+        if ($investBack) {
+            // On win: player receives invest + invest*(win/100) = invest*(1 + win/100)
+            // RTP = prob * (1 + win/100)  =>  prob = RTP / (1 + win/100)
+            $prob = $rtp / (1 + $win / 100);
+        } else {
+            // On win: player receives invest*(win/100) only
+            // RTP = prob * (win/100)  =>  prob = RTP / (win/100) = RTP * 100 / win
+            $prob = $rtp * 100 / $win;
+        }
+
+        return min(99.99, max(0.01, round($prob * 100, 2)));
+    }
+
+    /**
+     * Calculate chance[] array for NumberSlot from house_edge and level bonuses.
+     * Uses a 5:2:1 ratio for single:double:triple wins.
+     *
+     * @param float $houseEdge House edge percentage (0-100)
+     * @param array $levels    [single_bonus%, double_bonus%, triple_bonus%]
+     * @return array           [no_win%, single%, double%, triple%]
+     */
+    private function calculateNumberSlotChances(float $houseEdge, array $levels): array
+    {
+        $rtp          = (100 - $houseEdge) / 100;
+        $singleBonus  = (float) ($levels[0] ?? 100);
+        $doubleBonus  = (float) ($levels[1] ?? 200);
+        $tripleBonus  = (float) ($levels[2] ?? 500);
+
+        // With proportions 5:2:1 for single:double:triple
+        // RTP = k*(5*singleBonus + 2*doubleBonus + tripleBonus) / 10000
+        $denominator = 5 * $singleBonus + 2 * $doubleBonus + $tripleBonus;
+
+        if ($denominator <= 0) {
+            return [70, 15, 10, 5];
+        }
+
+        $k      = $rtp * 10000 / $denominator;
+        $single = round($k * 5, 2);
+        $double = round($k * 2, 2);
+        $triple = round($k * 1, 2);
+        $noWin  = max(0, round(100 - $single - $double - $triple, 2));
+
+        return [$noWin, $single, $double, $triple];
+    }
+
+    /**
+     * Calculate per-segment probabilities for DreamCatcher from house_edge.
+     * Each segment: total return = (multiplier + 1) * invest (invest returned on win).
+     * RTP per bet = prob * (multiplier + 1) = (100 - house_edge) / 100
+     *
+     * @param float $houseEdge House edge percentage (0-100)
+     * @return array           Associative array of segment probabilities
+     */
+    private function calculateDreamCatcherProbabilities(float $houseEdge): array
+    {
+        $rtp = (100 - $houseEdge) / 100;
+
+        return [
+            'one'    => min(99.99, round($rtp / (1 + 1) * 100, 2)),
+            'two'    => min(99.99, round($rtp / (2 + 1) * 100, 2)),
+            'five'   => min(99.99, round($rtp / (5 + 1) * 100, 2)),
+            'ten'    => min(99.99, round($rtp / (10 + 1) * 100, 2)),
+            'twenty' => min(99.99, round($rtp / (20 + 1) * 100, 2)),
+            'forty'  => min(99.99, round($rtp / (40 + 1) * 100, 2)),
+            'twox'   => 10.00,
+            'sevenx' => 5.00,
+        ];
     }
 }
