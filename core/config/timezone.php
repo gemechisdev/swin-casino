@@ -1,1 +1,1 @@
-<?php return "UTC";
+<?php return "Africa/Addis_Ababa";
