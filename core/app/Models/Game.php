@@ -15,6 +15,8 @@ class Game extends Model {
         'level'             => 'object',
         'probable_win'      => 'object',
         'probable_win_demo' => 'object',
+        'house_edge'        => 'float',
+        'house_edge_demo'   => 'float',
     ];
 
 }
