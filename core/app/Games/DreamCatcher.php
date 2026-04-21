@@ -18,7 +18,7 @@ class DreamCatcher extends Game
         $point = null;
         $spinStatus = false;
         $winAmount = 0;
-        $random = mt_rand(0, 100);
+        $random = mt_rand(0, 10000) / 100;
         if ($this->demoPlay) {
             $probableWin = $this->getWinValueDemo($this->request->choose);
         } else {
@@ -30,7 +30,7 @@ class DreamCatcher extends Game
             $win = Status::WIN;
             $result = $this->request->choose;
             $point = $result;
-            $random = mt_rand(0, 100);
+            $random = mt_rand(0, 10000) / 100;
             if ($this->demoPlay) {
                 if ($random <= $this->game->probable_win_demo->twox) {
                     $resultOption = [1, 2, 5, 10, 20, 40, '2x'];
@@ -157,7 +157,7 @@ class DreamCatcher extends Game
         if ($this->request->re_spin == 'true') {
             $point = $gameLog->result;
             $spinStatus = false;
-            $random = mt_rand(0, 100);
+            $random = mt_rand(0, 10000) / 100;
             if ($this->demoPlay) {
                 if ($random <= $this->game->probable_win_demo->twox) {
                     $resultOption = [1, 2, 5, 10, 20, 40, '2x'];

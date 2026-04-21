@@ -40,6 +40,24 @@
                                 <span class="input-group-text">{{ gs('cur_text') }}</span>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label>@lang('House Edge')</label>
+                            <div class="input-group mb-2">
+                                <input class="form-control" name="house_edge" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge ?? 5) }}" required>
+                                <span class="input-group-text">@lang('%')</span>
+                            </div>
+                            <small class="text--primary">@lang('Effective Win Rate'): {{ getAmount($game->probable_win ?? 0) }}%</small>
+                        </div>
+                        <div class="form-group">
+                            <label>@lang('Demo House Edge')</label>
+                            <div class="input-group mb-2">
+                                <input class="form-control" name="house_edge_demo" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge_demo ?? 2) }}" required>
+                                <span class="input-group-text">@lang('%')</span>
+                            </div>
+                            <small class="text--primary">@lang('Effective Win Rate'): {{ getAmount($game->probable_win_demo ?? 0) }}%</small>
+                        </div>
                     </div>
                 </div>
             </div>

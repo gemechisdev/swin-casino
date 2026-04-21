@@ -1648,3 +1648,11 @@ CREATE TABLE IF NOT EXISTS `failed_jobs` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- House edge migration for games
+-- --------------------------------------------------------
+
+ALTER TABLE `games`
+  ADD COLUMN IF NOT EXISTS `house_edge` decimal(5,2) NOT NULL DEFAULT 5.00 AFTER `invest_back`,
+  ADD COLUMN IF NOT EXISTS `house_edge_demo` decimal(5,2) NOT NULL DEFAULT 2.00 AFTER `house_edge`;

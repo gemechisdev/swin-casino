@@ -16,11 +16,12 @@ class CasinoDice extends Game
     {
         $winChance   = $this->request->percent;
         $amount      = $this->request->invest;
+        $houseEdge   = $this->demoPlay ? $this->game->house_edge_demo : $this->game->house_edge;
         $lessThan    = $winChance * 100;
         $greaterThan = 9900 - ($winChance * 100) + 99;
-        $payout      = round(99 / $winChance, 4);
+        $payout      = round((100 - $houseEdge) / $winChance, 4);
         $winAmo      = $amount * $payout;
-        $allChances  = rand(1, 98);
+        $allChances  = mt_rand(0, 10000) / 100;
         $choose      = $this->request->choose;
 
         if ($winChance >= $allChances) {

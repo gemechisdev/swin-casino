@@ -158,6 +158,8 @@ class BlackJack extends Game
 
         $userSum   = $this->reduceAce($userCardSum, $userAceCount);
         $dealerSum = $this->reduceAce($dealerCardSum, $dealerAceCount);
+        $probableWin = $this->demoPlay ? $this->game->probable_win_demo : $this->game->probable_win;
+        $random = mt_rand(0, 10000) / 100;
 
         if ($userSum > 21) {
             $gameLog->win_status = Status::LOSS;
@@ -168,12 +170,14 @@ class BlackJack extends Game
         } else if ($userSum == $dealerSum) {
             $gameLog->win_status = Status::WIN;
             $winStatus           = 'Tie';
-        } else if ($userSum > $dealerSum) {
-            $gameLog->win_status = Status::WIN;
-            $winStatus           = 'Win';
-        } else if ($userSum < $dealerSum) {
-            $gameLog->win_status = Status::LOSS;
-            $winStatus           = 'Loss';
+        } else {
+            if ($random <= $probableWin) {
+                $gameLog->win_status = Status::WIN;
+                $winStatus           = 'Win';
+            } else {
+                $gameLog->win_status = Status::LOSS;
+                $winStatus           = 'Loss';
+            }
         }
         $gameLog->save();
 

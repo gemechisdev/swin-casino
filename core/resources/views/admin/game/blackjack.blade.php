@@ -42,24 +42,24 @@
                                 <span class="input-group-text">{{ gs('cur_text') }}</span>
                             </div>
                         </div>
-                        @if (!$game->alias == 'blackjack')
-                            <div class="form-group">
-                                <label>@lang('Win Chance')</label>
-                                <div class="input-group">
-                                    <input class="form-control" name="probable" type="number"
-                                        value="{{ getAmount($game->probable_win) }}" required>
-                                    <span class="input-group-text">%</span>
-                                </div>
+                        <div class="form-group">
+                            <label>@lang('House Edge')</label>
+                            <div class="input-group">
+                                <input class="form-control" name="house_edge" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge ?? 5) }}" required>
+                                <span class="input-group-text">%</span>
                             </div>
-                            <div class="form-group">
-                                <label>@lang('Win Chance For Demo')</label>
-                                <div class="input-group">
-                                    <input class="form-control" name="probable_demo" type="number"
-                                        value="{{ getAmount($game->probable_win_demo) }}" required>
-                                    <span class="input-group-text">%</span>
-                                </div>
+                            <small class="text--primary">@lang('Effective Win Rate'): {{ getAmount($game->probable_win ?? 0) }}%</small>
+                        </div>
+                        <div class="form-group">
+                            <label>@lang('Demo House Edge')</label>
+                            <div class="input-group">
+                                <input class="form-control" name="house_edge_demo" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge_demo ?? 2) }}" required>
+                                <span class="input-group-text">%</span>
                             </div>
-                        @endif
+                            <small class="text--primary">@lang('Effective Win Rate'): {{ getAmount($game->probable_win_demo ?? 0) }}%</small>
+                        </div>
                         <div class="form-group">
                             <label>@lang('Win Commission')</label>
                             <div class="input-group">
