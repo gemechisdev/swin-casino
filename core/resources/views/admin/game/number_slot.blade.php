@@ -51,50 +51,28 @@
                             </div>
                         </div>
 
-                        <h5 class="my-3">@lang('Win Chance Setting')</h5>
+                        <h5 class="my-3">@lang('House Edge Setting')</h5>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>@lang('No Win Chance')</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" name="chance[]"
-                                            value="{{ getAmount(@$game->probable_win[0]) }}"
-                                            placeholder="Triple Win Chance">
+                                    <label>@lang('House Edge')</label>
+                                    <div class="input-group mb-2">
+                                        <input type="number" class="form-control" name="house_edge" step="0.01" min="0" max="99.99"
+                                            value="{{ getAmount($game->house_edge ?? 5) }}">
                                         <span class="input-group-text">@lang('%')</span>
                                     </div>
+                                    <small class="text--primary">@lang('Effective Win Rates'): {{ getAmount(@$game->probable_win[1] ?? 0) }}% / {{ getAmount(@$game->probable_win[2] ?? 0) }}% / {{ getAmount(@$game->probable_win[3] ?? 0) }}%</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>@lang('Single Win Chance') </label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" name="chance[]"
-                                            value="{{ getAmount(@$game->probable_win[1]) }}"
-                                            placeholder="Single Win Chance">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Double Win Chance') </label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" name="chance[]"
-                                            value="{{ getAmount(@$game->probable_win[2]) }}"
-                                            placeholder="Double Win Chance">
+                                    <label>@lang('Demo House Edge')</label>
+                                    <div class="input-group mb-2">
+                                        <input type="number" class="form-control" name="house_edge_demo" step="0.01" min="0" max="99.99"
+                                            value="{{ getAmount($game->house_edge_demo ?? 2) }}">
                                         <span class="input-group-text">@lang('%')</span>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Triple Win Chance')</label>
-                                    <div class="input-group mb-3">
-                                        <input type="number" class="form-control" name="chance[]"
-                                            value="{{ getAmount(@$game->probable_win[3]) }}"
-                                            placeholder="Triple Win Chance">
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
+                                    <small class="text--primary">@lang('Effective Win Rates'): {{ getAmount(@$game->probable_win_demo[1] ?? 0) }}% / {{ getAmount(@$game->probable_win_demo[2] ?? 0) }}% / {{ getAmount(@$game->probable_win_demo[3] ?? 0) }}%</small>
                                 </div>
                             </div>
                         </div>

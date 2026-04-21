@@ -42,13 +42,15 @@ class Roulette extends Game
             $numbers = [$this->request->choose];
         }
 
-        $random = rand(1, 36);
+        $houseEdge = $this->demoPlay ? $this->game->house_edge_demo : $this->game->house_edge;
+        $random = mt_rand(1, 36);
         if (in_array($random, $numbers)) {
             $win = Status::WIN;
         } else {
             $win = Status::LOSS;
         }
-        $winAmount = $this->request->invest * (36 / count($numbers));
+        $trueOdds = 36 / count($numbers);
+        $winAmount = $this->request->invest * ($trueOdds * ((100 - $houseEdge) / 100));
         $winLossData['win_status'] = $win;
         $winLossData['result'] = $random;
         $winLossData['win_amount'] = $winAmount;

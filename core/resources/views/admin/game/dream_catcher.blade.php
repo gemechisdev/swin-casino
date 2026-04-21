@@ -19,199 +19,38 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="card-title">@lang('Win Setting')</h5>
+                        <h5 class="card-title">@lang('House Edge Setting')</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 1')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[one]" type="number"
-                                            value="{{ @$game->probable_win->one }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
+                        <div class="form-group">
+                            <label>@lang('House Edge')</label>
+                            <div class="input-group mb-2">
+                                <input class="form-control" name="house_edge" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge ?? 5) }}" required>
+                                <span class="input-group-text">@lang('%')</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 2')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[two]" type="number"
-                                            value="{{ @$game->probable_win->two }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 5')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[five]" type="number"
-                                            value="{{ @$game->probable_win->five }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 10')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[ten]" type="number"
-                                            value="{{ @$game->probable_win->ten }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 20')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[twenty]" type="number"
-                                            value="{{ @$game->probable_win->twenty }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 40')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[forty]" type="number"
-                                            value="{{ @$game->probable_win->forty }}" step="any" min="0"
-                                            max="100" required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 2x')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[twox]" type="number"
-                                            value="{{ @$game->probable_win->twox }}" step="any" min="0"
-                                            max="100" required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 7x')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win[sevenx]" type="number"
-                                            value="{{ @$game->probable_win->sevenx }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <small class="text--primary">
+                                @lang('Effective Win Rate'):
+                                1={{ getAmount(@$game->probable_win->one ?? 0) }}%,
+                                2={{ getAmount(@$game->probable_win->two ?? 0) }}%,
+                                5={{ getAmount(@$game->probable_win->five ?? 0) }}%
+                            </small>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">@lang('Win Setting For Demo')</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 1')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[one]" type="number"
-                                            value="{{ @$game->probable_win_demo->one }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
+                        <div class="form-group">
+                            <label>@lang('Demo House Edge')</label>
+                            <div class="input-group mb-2">
+                                <input class="form-control" name="house_edge_demo" type="number" step="0.01" min="0" max="99.99"
+                                    value="{{ getAmount($game->house_edge_demo ?? 2) }}" required>
+                                <span class="input-group-text">@lang('%')</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 2')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[two]" type="number"
-                                            value="{{ @$game->probable_win_demo->two }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 5')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[five]" type="number"
-                                            value="{{ @$game->probable_win_demo->five }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 10')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[ten]" type="number"
-                                            value="{{ @$game->probable_win_demo->ten }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 20')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[twenty]" type="number"
-                                            value="{{ @$game->probable_win_demo->twenty }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 40')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[forty]" type="number"
-                                            value="{{ @$game->probable_win_demo->forty }}" step="any" min="0"
-                                            max="100" required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 2x')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[twox]" type="number"
-                                            value="{{ @$game->probable_win_demo->twox }}" step="any" min="0"
-                                            max="100" required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('Win Probability For 7x')</label>
-                                    <div class="input-group">
-                                        <input class="form-control" name="probable_win_demo[sevenx]" type="number"
-                                            value="{{ @$game->probable_win_demo->sevenx }}" step="any" min="0"
-                                            max="100"  required>
-                                        <span class="input-group-text">@lang('%')</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <small class="text--primary">
+                                @lang('Effective Win Rate'):
+                                1={{ getAmount(@$game->probable_win_demo->one ?? 0) }}%,
+                                2={{ getAmount(@$game->probable_win_demo->two ?? 0) }}%,
+                                5={{ getAmount(@$game->probable_win_demo->five ?? 0) }}%
+                            </small>
                         </div>
                     </div>
                 </div>

@@ -14,7 +14,7 @@ class NumberSlot extends Game {
     ];
 
     protected function gameResult() {
-        $random = mt_rand(0, 100);
+        $random = mt_rand(0, 10000) / 100;
         if ($this->game->probable_win[0] > $random) {
             $result = $this->numberSlotResult(0, $this->request->choose);
             $win    = 0;

@@ -288,7 +288,7 @@ class PaiGowPoker extends Game {
         }
 
         $probableWin = $this->demoPlay ? $this->game->probable_win_demo : $this->game->probable_win;
-        $random      = mt_rand(0, 100);
+        $random      = mt_rand(0, 10000) / 100;
 
         if ($random <= $probableWin) {
             $win          = Status::WIN;
