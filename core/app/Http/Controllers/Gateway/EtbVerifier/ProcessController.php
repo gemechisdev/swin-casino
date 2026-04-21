@@ -19,11 +19,24 @@ class ProcessController extends Controller
 
     public static function process($deposit)
     {
-        $alias          = $deposit->gateway->alias;
-        $send['track']  = $deposit->trx;
-        $send['view']   = 'user.payment.' . $alias;
-        $send['method'] = 'post';
-        $send['url']    = route('ipn.' . $alias);
+        $alias     = $deposit->gateway->alias;
+        $params    = json_decode($deposit->gatewayCurrency()->gateway_parameter);
+        $apiKey    = trim($params->api_key ?? '');
+        $hasTelebirr = !empty(trim($params->telebirr_account ?? ''));
+        $hasCbe      = !empty(trim($params->cbe_account ?? ''));
+
+        if (!$apiKey || (!$hasTelebirr && !$hasCbe)) {
+            $send['error']   = true;
+            $send['message'] = 'Gateway is not fully configured. Please contact support.';
+            return json_encode($send);
+        }
+
+        $send['track']       = $deposit->trx;
+        $send['view']        = 'user.payment.' . $alias;
+        $send['method']      = 'post';
+        $send['url']         = route('ipn.' . $alias);
+        $send['has_telebirr'] = $hasTelebirr;
+        $send['has_cbe']      = $hasCbe;
         return json_encode($send);
     }
 
@@ -47,20 +60,21 @@ class ProcessController extends Controller
         }
 
         $request->validate([
-            'reference' => 'required|string|max:100',
-            'payer_name' => 'required|string|max:100',
-            'payer_telebirr_no' => 'nullable|string|max:30',
-            'payer_cbe_account' => 'nullable|string|max:40',
+            'reference'      => 'required|string|max:100',
+            'payer_name'     => 'required|string|max:100',
+            'payment_method' => 'nullable|string|in:telebirr,cbe',
+            'payer_telebirr_no'  => 'nullable|string|max:30',
+            'payer_cbe_account'  => 'nullable|string|max:40',
         ]);
 
         $reference = strtoupper(trim($request->reference));
         $payerName = trim($request->payer_name);
 
         $gatewayParameter = json_decode($deposit->gatewayCurrency()->gateway_parameter);
-        $baseUrl = rtrim(trim($gatewayParameter->api_base ?? 'https://verifyapi.leulzenebe.pro'), '/');
-        $apiKey = trim($gatewayParameter->api_key ?? '');
+        $baseUrl         = rtrim(trim($gatewayParameter->api_base ?? 'https://verifyapi.leulzenebe.pro'), '/');
+        $apiKey          = trim($gatewayParameter->api_key ?? '');
         $telebirrAccount = trim($gatewayParameter->telebirr_account ?? '');
-        $cbeAccount = trim($gatewayParameter->cbe_account ?? '');
+        $cbeAccount      = trim($gatewayParameter->cbe_account ?? '');
 
         if (!$apiKey) {
             $notify[] = ['error', 'Gateway configuration is incomplete'];
@@ -70,14 +84,42 @@ class ProcessController extends Controller
             return redirect($deposit->failed_url)->withNotify($notify);
         }
 
-        $isCbeReference = (bool) preg_match('/^FT[A-Z0-9]{10}$/i', $reference);
+        // Determine which method to use.
+        // Explicit user selection is the primary source of truth.
+        // Auto-detect from prefix (MP/FT) is used only when no explicit selection is provided.
+        $hasTelebirr = $telebirrAccount !== '';
+        $hasCbe      = $cbeAccount !== '';
+
+        if ($request->filled('payment_method')) {
+            $selectedMethod = $request->payment_method;
+        } else {
+            // Auto-detect from reference prefix as convenience hint
+            $selectedMethod = preg_match('/^FT[A-Z0-9]{10}$/i', $reference) ? 'cbe' : 'telebirr';
+        }
+
+        // Fall back to whichever method is actually configured if the selected one isn't
+        if ($selectedMethod === 'cbe' && !$hasCbe && $hasTelebirr) {
+            $selectedMethod = 'telebirr';
+        } elseif ($selectedMethod === 'telebirr' && !$hasTelebirr && $hasCbe) {
+            $selectedMethod = 'cbe';
+        }
+
+        if (($selectedMethod === 'cbe' && !$hasCbe) || ($selectedMethod === 'telebirr' && !$hasTelebirr)) {
+            $notify[] = ['error', 'The selected payment method is not available.'];
+            if ($apiRequest) {
+                return responseError('method_unavailable', $notify);
+            }
+            return back()->withNotify($notify);
+        }
+
+        $isCbeReference = $selectedMethod === 'cbe';
         $endpoint = $isCbeReference ? '/verify-cbe' : '/verify-telebirr';
-        $payload = ['reference' => $reference];
+        $payload  = ['reference' => $reference];
 
         if ($isCbeReference) {
             $payerCbeAccount = trim((string) $request->payer_cbe_account);
             if (!$payerCbeAccount) {
-                $notify[] = ['error', 'CBE account number is required for this reference'];
+                $notify[] = ['error', 'CBE account number is required for CBE transfers'];
                 if ($apiRequest) {
                     return responseError('validation_error', $notify);
                 }
@@ -194,11 +236,11 @@ class ProcessController extends Controller
 
         $deposit->btc_wallet = $reference;
         $deposit->detail = [
-            'reference' => $reference,
-            'gateway_type' => $isCbeReference ? 'cbe' : 'telebirr',
-            'payer_name' => $payerName,
-            'payer_telebirr_no' => $request->payer_telebirr_no,
-            'payer_cbe_account' => $request->payer_cbe_account,
+            'reference'      => $reference,
+            'gateway_type'   => $isCbeReference ? 'cbe' : 'telebirr',
+            'payer_name'     => $payerName,
+            'payer_telebirr_no'  => $request->payer_telebirr_no,
+            'payer_cbe_account'  => $request->payer_cbe_account,
             'verification_response' => $decoded,
         ];
         $deposit->save();
