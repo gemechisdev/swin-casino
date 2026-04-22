@@ -38,7 +38,7 @@
                 </div>
                 <div class="banner-slider-dots"></div>
             </div>
-            <div class="col-lg-6 order-lg-2 order-1">
+            <div class="col-lg-6 order-lg-2 order-1 d-none d-lg-block">
                 <div class="banner-thumb">
                     <img src="{{ getImage('assets/images/frontend/banner/' . @$bannerContent->data_values->image, '670x675') }}" alt="@lang('image')">
                 </div>

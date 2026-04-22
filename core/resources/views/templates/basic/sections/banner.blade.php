@@ -38,6 +38,16 @@
     </div>
 </section>
 
+@push('style')
+<style>
+    @media (max-width: 991px) {
+        .hero.bg_img {
+            background-image: none !important;
+        }
+    }
+</style>
+@endpush
+
 @push('script')
 <script>
     (function($){
