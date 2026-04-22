@@ -28,7 +28,7 @@
                         </div>
                         <div class="col-lg-5 col-md-6 d-none d-md-block">
                             <div class="hero__thumb wow fadeInUp" data-wow-duration="0.5s" data-wow-delay="0.3s">
-                                <img src="{{ getImage(getFilePath('game') . '/' . $game->image, getFileSize('game')) }}" alt="{{ __($game->name) }}">
+                                <img src="{{ getImage(getFilePath('game') . '/' . $game->image, getFileSize('game')) }}" alt="{{ __($game->name) }}" style="max-height:350px;width:auto;object-fit:contain;">
                             </div>
                         </div>
                     </div>
