@@ -57,7 +57,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="mb-3">@lang('Quick Actions')</h5>
-                            <div class="d-flex flex-wrap gap-2">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center quick-actions">
                                 <a href="{{ route('user.deposit.index') }}" class="cmn-btn btn-sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
                                 <a href="{{ route('user.withdraw') }}" class="cmn-btn-two btn-sm"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
                                 <a href="{{ route('games') }}" class="cmn-btn-two btn-sm"><i class="las la-gamepad"></i> @lang('Play Games')</a>
@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-balance h-100">
                         <div class="d-widget-icon">
                             <i class="las la-money-bill-wave"></i>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-deposit h-100">
                         <div class="d-widget-icon">
                             <i class="las la-wallet"></i>
@@ -90,7 +90,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-withdraw h-100">
                         <div class="d-widget-icon">
                             <i class="las la-hand-holding-usd"></i>
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-invest h-100">
                         <div class="d-widget-icon">
                             <i class="las la-cash-register"></i>
@@ -112,7 +112,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-win h-100">
                         <div class="d-widget-icon">
                             <i class="las la-trophy"></i>
@@ -123,7 +123,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-30">
+                <div class="col-lg-4 col-md-6 col-6 mb-30">
                     <div class="d-widget dashbaord-widget-card d-widget-loss h-100">
                         <div class="d-widget-icon">
                             <i class="las la-money-bill-alt"></i>

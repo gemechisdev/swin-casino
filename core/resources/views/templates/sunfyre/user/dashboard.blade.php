@@ -42,7 +42,7 @@
     <div class="card custom--card mb-4">
         <div class="card-body">
             <h5 class="mb-3">@lang('Quick Actions')</h5>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 justify-content-center quick-actions">
                 <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
                 <a href="{{ route('user.withdraw') }}" class="btn btn-outline--base btn--sm"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
                 <a href="{{ route('games') }}" class="btn btn-outline--base btn--sm"><i class="las la-gamepad"></i> @lang('Play Games')</a>

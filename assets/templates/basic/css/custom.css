@@ -575,3 +575,18 @@ label.required:after {
   background-color: #ea5455 !important;
   box-shadow: 0 0 10px 2px #ea54558c !important;
 }
+
+/* Quick Actions: centered on desktop, 2-per-row on mobile */
+.quick-actions {
+  justify-content: center !important;
+}
+
+@media (max-width: 575px) {
+  .quick-actions > a {
+    flex: 1 1 calc(50% - 4px);
+    text-align: center;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+  }
+}

@@ -592,3 +592,29 @@ label.required:after {
   color: #dc3545 !important;
   margin-left: 2px;
 }
+
+/* Dashboard info-card: 3-per-row on large screens, 2-per-row on all smaller */
+.info-card {
+  width: calc(33.333% - 16px);
+}
+
+@media screen and (max-width: 1199px) {
+  .info-card {
+    width: calc(50% - 12px);
+  }
+}
+
+/* Quick Actions: centered on desktop, 2-per-row on mobile */
+.quick-actions {
+  justify-content: center !important;
+}
+
+@media (max-width: 575px) {
+  .quick-actions > a {
+    flex: 1 1 calc(50% - 4px);
+    text-align: center;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+  }
+}
