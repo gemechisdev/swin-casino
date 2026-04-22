@@ -19,7 +19,7 @@
                                             @guest
                                                 <a href="{{ route('user.play.game', $game->alias) }}" class="btn btn--gradient">@lang('Play Now')</a>
                                             @else
-                                                <div class="d-flex flex-wrap gap-2">
+                                                <div class="d-flex flex-wrap gap-2 quick-actions">
                                                     <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
                                                     <a href="{{ route('user.withdraw') }}" class="btn btn-outline--base btn--sm bg-white text-dark"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
                                                     <a href="{{ route('games') }}" class="btn btn-outline--base btn--sm bg-white text-dark"><i class="las la-gamepad"></i> @lang('Play Games')</a>
