@@ -19,17 +19,66 @@ class ProcessController extends Controller
 
     public static function isConfigured(\App\Models\GatewayCurrency $gatewayCurrency): bool
     {
-        $params = json_decode($gatewayCurrency->gateway_parameter ?? '{}') ?: new \stdClass();
-        $apiKey = trim($params->api_key ?? '');
+        // Resolve credentials by merging gateway-level template values (gateway_parameters)
+        // with per-currency overrides (gateway_parameter), same as resolvedGatewayParams().
+        $params = self::resolveParams($gatewayCurrency);
 
+        $apiKey = trim($params['api_key'] ?? '');
         if (!$apiKey) {
             return false;
         }
 
-        $hasTelebirr = !empty(trim($params->telebirr_account ?? ''));
-        $hasCbe      = !empty(trim($params->cbe_account ?? ''));
+        $hasTelebirr = !empty(trim($params['telebirr_account'] ?? ''));
+        $hasCbe      = !empty(trim($params['cbe_account'] ?? ''));
 
         return $hasTelebirr || $hasCbe;
+    }
+
+    /**
+     * Resolve flat parameter values from both the gateway-level template
+     * (gateway_parameters on Gateway) and the per-currency overrides
+     * (gateway_parameter on GatewayCurrency), with per-currency taking precedence.
+     */
+    private static function resolveParams(\App\Models\GatewayCurrency $gatewayCurrency): array
+    {
+        $merged = [];
+
+        // 1. Start with gateway-level template values (global params)
+        $method = $gatewayCurrency->method;
+        if ($method) {
+            $rawTemplate = $method->getRawOriginal('gateway_parameters') ?? $method->gateway_parameters;
+            if ($rawTemplate && is_string($rawTemplate)) {
+                $template = json_decode($rawTemplate, true);
+                if (is_array($template)) {
+                    foreach ($template as $key => $val) {
+                        // Template entries look like {"api_key": {"title": "...", "value": "actual-value"}}
+                        if (is_array($val) && array_key_exists('value', $val)) {
+                            $merged[$key] = $val['value'];
+                        } else {
+                            $merged[$key] = $val;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Override with per-currency flat values (gateway_parameter)
+        $rawCurrency = $gatewayCurrency->getRawOriginal('gateway_parameter') ?? $gatewayCurrency->gateway_parameter;
+        if ($rawCurrency && is_string($rawCurrency)) {
+            $currencyParams = json_decode($rawCurrency, true);
+            if (is_array($currencyParams)) {
+                foreach ($currencyParams as $key => $val) {
+                    // Per-currency entries are flat: {"api_key": "actual-value"}
+                    if (is_array($val) && array_key_exists('value', $val)) {
+                        $merged[$key] = $val['value'];
+                    } else {
+                        $merged[$key] = $val;
+                    }
+                }
+            }
+        }
+
+        return $merged;
     }
 
     public static function process($deposit)
