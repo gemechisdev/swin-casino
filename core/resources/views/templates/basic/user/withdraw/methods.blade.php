@@ -12,7 +12,7 @@
                                     <div class="card">
                                         <div class="card-body p-0">
                                             <div class="payment-system-list is-scrollable gateway-option-list">
-                                                @foreach ($withdrawMethod as $data)
+                                                @forelse ($withdrawMethod as $data)
                                                     <label for="{{ titleToKey($data->name) }}"
                                                         class="payment-item @if ($loop->index > 4) d-none @endif gateway-option">
                                                         <div class="payment-item__info">
@@ -32,7 +32,12 @@
                                                             data-min-amount="{{ showAmount($data->min_limit) }}"
                                                             data-max-amount="{{ showAmount($data->max_limit) }}">
                                                     </label>
-                                                @endforeach
+                                                @empty
+                                                    <div class="text-center p-4">
+                                                        <i class="las la-wallet fs-1 text-muted mb-2"></i>
+                                                        <p class="text-muted">@lang('No withdraw methods are currently available. Please check back later or contact support.')</p>
+                                                    </div>
+                                                @endforelse
                                                 @if ($withdrawMethod->count() > 4)
                                                     <button type="button" class="payment-item__btn more-gateway-option">
                                                         <p class="payment-item__btn-text">@lang('Show All Payment Options')</p>
@@ -166,6 +171,9 @@
                 let methodCode = gatewayElement.val();
 
                 gateway = gatewayElement.data('gateway');
+                
+                if (!gateway) return;
+
                 minAmount = gatewayElement.data('min-amount');
                 maxAmount = gatewayElement.data('max-amount');
 

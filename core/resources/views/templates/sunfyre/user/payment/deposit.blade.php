@@ -11,7 +11,7 @@
                             <div class="card custom--card">
                                 <div class="card-body p-0">
                                     <div class="payment-system-list is-scrollable gateway-option-list">
-                                        @foreach ($gatewayCurrency as $data)
+                                        @forelse ($gatewayCurrency as $data)
                                             <label for="{{ titleToKey($data->name) }}"
                                                 class="payment-item @if ($loop->index > 4) d-none @endif gateway-option">
                                                 <div class="payment-item__info">
@@ -27,11 +27,16 @@
                                                     id="{{ titleToKey($data->name) }}" hidden
                                                     data-gateway='@json($data)' type="radio"
                                                     name="gateway" value="{{ $data->method_code }}"
-                                                    @checked(old('method_code', $loop->first) == $data->id)
+                                                    @checked(old('gateway', $loop->first ? $data->method_code : null) == $data->method_code)
                                                     data-min-amount="{{ showAmount($data->min_amount) }}"
                                                     data-max-amount="{{ showAmount($data->max_amount) }}">
                                             </label>
-                                        @endforeach
+                                        @empty
+                                            <div class="text-center p-4">
+                                                <i class="las la-wallet fs-1 text-muted mb-2"></i>
+                                                <p class="text-muted">@lang('No payment gateways are currently available. Please check back later or contact support.')</p>
+                                            </div>
+                                        @endforelse
                                         @if ($gatewayCurrency->count() > 4)
                                             <button type="button" class="payment-item__btn more-gateway-option">
                                                 <p class="payment-item__btn-text">@lang('Show All Payment Options')</p>
@@ -180,6 +185,9 @@
                 let methodCode = gatewayElement.val();
 
                 gateway = gatewayElement.data('gateway');
+
+                if (!gateway) return;
+
                 minAmount = gatewayElement.data('min-amount');
                 maxAmount = gatewayElement.data('max-amount');
 

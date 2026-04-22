@@ -5,9 +5,9 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header text-center">
-                            <h5>@lang('ETB Verifier')</h5>
+                    <div class="card custom--card">
+                        <div class="card-header text-center border-0 bg-transparent">
+                            <h5 class="title mt-2">@lang('ETB Verifier')</h5>
                         </div>
                         <div class="card-body">
                             @php
@@ -75,7 +75,7 @@
                                     </div>
                                 @endif
 
-                                <button class="cmn-btn w-100" type="submit">@lang('Verify & Confirm Deposit')</button>
+                                <button class="btn btn--base w-100 mt-3" type="submit">@lang('Verify & Confirm Deposit')</button>
                             </form>
                         </div>
                     </div>
