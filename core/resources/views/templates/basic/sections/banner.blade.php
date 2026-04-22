@@ -13,6 +13,13 @@
                             <a class="cmn-btn" href="{{ @$banner->data_values->button_url_one ?? '#' }}">{{ __(@$banner->data_values->button_one) }}</a>
                             <a class="cmn-btn-two" href="{{ @$banner->data_values->button_url_two ?? '#' }}">{{ __(@$banner->data_values->button_two) }}</a>
                         </div>
+                    @else
+                        <div class="btn-group justify-content-lg-start justify-content-center wow fadeInUp mt-4 gap-2" data-wow-duration="0.5s" data-wow-delay="0.9s">
+                            <a href="{{ route('user.deposit.index') }}" class="cmn-btn btn-sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
+                            <a href="{{ route('user.withdraw') }}" class="cmn-btn-two btn-sm"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
+                            <a href="{{ route('games') }}" class="cmn-btn-two btn-sm"><i class="las la-gamepad"></i> @lang('Play Games')</a>
+                            <a href="{{ route('user.home') }}" class="cmn-btn-two btn-sm"><i class="las la-home"></i> @lang('Dashboard')</a>
+                        </div>
                     @endguest
                 </div>
             </div>

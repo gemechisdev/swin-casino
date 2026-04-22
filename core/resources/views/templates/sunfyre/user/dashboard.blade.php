@@ -39,6 +39,18 @@
         </div>
     @endif
 
+    <div class="card custom--card mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">@lang('Quick Actions')</h5>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
+                <a href="{{ route('user.withdraw') }}" class="btn btn-outline--base btn--sm"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
+                <a href="{{ route('games') }}" class="btn btn-outline--base btn--sm"><i class="las la-gamepad"></i> @lang('Play Games')</a>
+                <a href="{{ route('user.profile.setting') }}" class="btn btn-outline--base btn--sm"><i class="las la-user-circle"></i> @lang('Profile')</a>
+            </div>
+        </div>
+    </div>
+
     <div class="info-wrapper">
         <div class="info-card">
             <div class="info-card__icon">

@@ -16,7 +16,16 @@
                                         <h1 class="banner-content__title">{{ __(@$banner->data_values->title) }}</h1>
                                         <p class="banner-content__desc">{{ __(@$banner->data_values->subtitle) }}</p>
                                         <div class="banner-content__button">
-                                            <a href="{{ url(@$banner->data_values->button_url) }}" class="btn btn--gradient">{{ __(@$banner->data_values->button_name) }}</a>
+                                            @guest
+                                                <a href="{{ url(@$banner->data_values->button_url) }}" class="btn btn--gradient">{{ __(@$banner->data_values->button_name) }}</a>
+                                            @else
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <a href="{{ route('user.deposit.index') }}" class="btn btn--base btn--sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
+                                                    <a href="{{ route('user.withdraw') }}" class="btn btn-outline--base btn--sm bg-white"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
+                                                    <a href="{{ route('games') }}" class="btn btn-outline--base btn--sm bg-white"><i class="las la-gamepad"></i> @lang('Play Games')</a>
+                                                    <a href="{{ route('user.home') }}" class="btn btn-outline--base btn--sm bg-white"><i class="las la-home"></i> @lang('Dashboard')</a>
+                                                </div>
+                                            @endguest
                                         </div>
                                     </div>
                                     <div class="banner-image">
