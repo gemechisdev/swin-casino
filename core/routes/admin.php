@@ -65,6 +65,35 @@ Route::middleware('admin')->group(function () {
         Route::post('dream-catcher/{id}', 'dreamCatcherUpdate')->name('dream.catcher.update');
     });
 
+    // Lottery
+    Route::controller('LotteryController')->name('lottery.')->prefix('lottery')->group(function () {
+        // Campaigns
+        Route::get('campaigns', 'campaigns')->name('campaigns');
+        Route::get('campaign/create', 'campaignCreate')->name('campaign.create');
+        Route::post('campaign/store', 'campaignStore')->name('campaign.store');
+        Route::get('campaign/edit/{id}', 'campaignEdit')->name('campaign.edit');
+        Route::post('campaign/update/{id}', 'campaignUpdate')->name('campaign.update');
+        Route::post('campaign/status/{id}', 'campaignStatus')->name('campaign.status');
+
+        // Phases
+        Route::get('phases', 'phases')->name('phases');
+        Route::get('phase/create/{campaignId}', 'phaseCreate')->name('phase.create');
+        Route::post('phase/store/{campaignId}', 'phaseStore')->name('phase.store');
+        Route::get('phase/edit/{id}', 'phaseEdit')->name('phase.edit');
+        Route::post('phase/update/{id}', 'phaseUpdate')->name('phase.update');
+        Route::post('phase/draw/{id}', 'phaseDraw')->name('phase.draw');
+        Route::post('phase/distribute/{id}', 'phaseDistribute')->name('phase.distribute');
+
+        // Prize Tiers
+        Route::post('tier/store/{phaseId}', 'tierStore')->name('tier.store');
+        Route::post('tier/delete/{id}', 'tierDelete')->name('tier.delete');
+
+        // Winners & Tickets
+        Route::get('winners', 'winners')->name('winners');
+        Route::post('winner/delivery/{id}', 'winnerUpdateDelivery')->name('winner.delivery');
+        Route::get('tickets', 'tickets')->name('tickets');
+    });
+
     // Users Manager
     Route::controller('ManageUsersController')->name('users.')->prefix('users')->group(function () {
         Route::get('/', 'allUsers')->name('all');

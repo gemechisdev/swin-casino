@@ -82,6 +82,10 @@ class FileInfo {
         $data['pwa_thumb'] = [
             'size' => '512x512',
         ];
+        $data['lottery'] = [
+            'path' => 'assets/images/lottery',
+            'size' => '800x800',
+        ];
         return $data;
     }
 

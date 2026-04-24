@@ -100,6 +100,16 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('history', 'withdrawLog')->name('.history');
             });
 
+            // Lottery
+            Route::controller('LotteryController')->prefix('lottery')->name('lottery.')->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('show/{id}', 'show')->name('show');
+                Route::post('buy/{id}', 'buyTickets')->name('buy');
+                Route::get('my-tickets', 'myTickets')->name('my_tickets');
+                Route::get('winners', 'winners')->name('winners');
+                Route::get('history', 'history')->name('history');
+            });
+
             Route::controller('PlayController')->prefix('play')->name('play.')->group(function () {
                 Route::get('{alias}/{demo?}', 'playGame')->name('game');
                 Route::post('invest/{alias}/{demo?}', 'investGame')->name('invest');

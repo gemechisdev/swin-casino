@@ -30,6 +30,7 @@ Route::controller('SiteController')->group(function () {
     Route::get('cookie-policy', 'cookiePolicy')->name('cookie.policy');
     Route::get('/cookie/accept', 'cookieAccept')->name('cookie.accept');
     Route::get('games', 'games')->name('games');
+    Route::get('lotteries', 'LotteryController@index')->name('lotteries');
     Route::get('blog', 'blog')->name('blog');
     Route::get('blog/{slug}', 'blogDetails')->name('blog.details');
     Route::get('policy/{slug}', 'policyPages')->name('policy.pages');

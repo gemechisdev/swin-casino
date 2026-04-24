@@ -47,4 +47,39 @@ class Status {
     const GAME_RUNNING  = 0;
     const GAME_FINISHED = 1;
 
+    // Lottery Phase States
+    const LOTTERY_PHASE_PENDING   = 0;
+    const LOTTERY_PHASE_ACTIVE    = 1;
+    const LOTTERY_PHASE_CLOSED    = 2;
+    const LOTTERY_PHASE_DRAWN     = 3;
+    const LOTTERY_PHASE_COMPLETED = 4;
+    const LOTTERY_PHASE_CANCELLED = 5;
+
+    // Lottery Draw Modes
+    const LOTTERY_DRAW_FROM_SOLD  = 1;
+    const LOTTERY_DRAW_FROM_SPACE = 2;
+
+    // Lottery Prize Types
+    const LOTTERY_PRIZE_CASH     = 1;
+    const LOTTERY_PRIZE_PHYSICAL = 2;
+
+    // Lottery Prize Amount Modes
+    const LOTTERY_PRIZE_FIXED      = 1;
+    const LOTTERY_PRIZE_POT_SHARE  = 2;
+
+    // Lottery Ticket States
+    const LOTTERY_TICKET_ACTIVE   = 1;
+    const LOTTERY_TICKET_WINNER   = 2;
+    const LOTTERY_TICKET_REFUNDED = 3;
+
+    // Lottery Winner Delivery States
+    const LOTTERY_DELIVERY_PENDING    = 0;
+    const LOTTERY_DELIVERY_DISPATCHED = 1;
+    const LOTTERY_DELIVERY_DELIVERED  = 2;
+
+    // Lottery Transaction Types
+    const LOTTERY_TRX_PURCHASE = 1;
+    const LOTTERY_TRX_REFUND   = 2;
+    const LOTTERY_TRX_WIN      = 3;
+
 }
