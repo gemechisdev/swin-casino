@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Constants\Status;
 use App\Models\LotteryCampaign;
@@ -9,6 +9,7 @@ use App\Models\LotteryTicket;
 use App\Models\LotteryWinner;
 use App\Models\LotteryTransaction;
 use App\Lottery\LotteryEngine;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class LotteryController extends Controller
@@ -17,6 +18,7 @@ class LotteryController extends Controller
 
     public function __construct()
     {
+        parent::__construct();
         $this->engine = new LotteryEngine();
     }
 
