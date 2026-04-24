@@ -14,6 +14,15 @@
                         <ul class="navbar-nav main-menu m-auto">
                             <li><a href="{{ route('user.home') }}">@lang('Dashboard')</a></li>
                             <li class="menu_has_children">
+                                <a href="#">@lang('Lottery')</a>
+                                <ul class="sub-menu">
+                                    <li><a href="{{ route('lotteries') }}">@lang('Browse Lotteries')</a></li>
+                                    <li><a href="{{ route('user.lottery.my_tickets') }}">@lang('My Tickets')</a></li>
+                                    <li><a href="{{ route('user.lottery.winners') }}">@lang('Winners')</a></li>
+                                    <li><a href="{{ route('user.lottery.history') }}">@lang('History')</a></li>
+                                </ul>
+                            </li>
+                            <li class="menu_has_children">
                                 <a href="#">@lang('Deposit')</a>
                                 <ul class="sub-menu">
                                     <li><a href="{{ route('user.deposit.index') }}">@lang('Deposit')</a></li>

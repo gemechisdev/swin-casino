@@ -32,6 +32,9 @@
                         <a class="nav-link {{ menuActive('games') }}" href="{{ route('games') }}">@lang('Game')</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ menuActive('lotteries') }}" href="{{ route('lotteries') }}">@lang('Lottery')</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ menuActive('blog') }}" href="{{ route('blog') }}">@lang('Blog')</a>
                     </li>
                     <li class="nav-item">

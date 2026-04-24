@@ -61,6 +61,7 @@
                                 <a href="{{ route('user.deposit.index') }}" class="cmn-btn btn-sm"><i class="las la-wallet"></i> @lang('Deposit')</a>
                                 <a href="{{ route('user.withdraw') }}" class="cmn-btn-two btn-sm"><i class="las la-hand-holding-usd"></i> @lang('Withdraw')</a>
                                 <a href="{{ route('games') }}" class="cmn-btn-two btn-sm"><i class="las la-gamepad"></i> @lang('Play Games')</a>
+                                <a href="{{ route('lotteries') }}" class="cmn-btn-two btn-sm"><i class="las la-ticket-alt"></i> @lang('Lottery')</a>
                                 <a href="{{ route('user.profile.setting') }}" class="cmn-btn-two btn-sm"><i class="las la-user-circle"></i> @lang('Profile')</a>
                             </div>
                         </div>

@@ -59,6 +59,37 @@
             }
         ]
     },
+    "lottery": {
+        "title": "Manage Lottery",
+        "icon": "las la-ticket-alt",
+        "menu_active": "admin.lottery*",
+        "submenu": [
+            {
+                "keyword": ["Lottery", "Campaign", "AddisWin"],
+                "title": "Campaigns",
+                "route_name": "admin.lottery.campaigns",
+                "menu_active": "admin.lottery.campaigns"
+            },
+            {
+                "keyword": ["Lottery", "Phases", "Draws"],
+                "title": "Phases",
+                "route_name": "admin.lottery.phases",
+                "menu_active": "admin.lottery.phases"
+            },
+            {
+                "keyword": ["Lottery", "Winners", "Prizes"],
+                "title": "Winners",
+                "route_name": "admin.lottery.winners",
+                "menu_active": "admin.lottery.winners"
+            },
+            {
+                "keyword": ["Lottery", "Tickets", "Sales"],
+                "title": "Tickets",
+                "route_name": "admin.lottery.tickets",
+                "menu_active": "admin.lottery.tickets"
+            }
+        ]
+    },
     "manage_users": {
         "title": "Manage Users",
         "icon": "las la-users",
