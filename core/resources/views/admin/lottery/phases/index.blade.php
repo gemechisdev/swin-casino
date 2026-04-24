@@ -35,14 +35,14 @@
                                                 </a>
                                                 @if($phase->status == Status::LOTTERY_PHASE_CLOSED && $phase->draw_at <= now())
                                                     <button class="btn btn-sm btn-outline--success confirmationBtn"
-                                                            data-action="{{ route('admin.lottery.phase.draw', $phase->id) }}"
+                                                            data-action="{{ route('admin.lottery.phases.draw', $phase->id) }}"
                                                             data-question="@lang('Are you sure to execute the draw now?')">
                                                         <i class="la la-random"></i> @lang('Draw')
                                                     </button>
                                                 @endif
                                                 @if($phase->status == Status::LOTTERY_PHASE_DRAWN)
                                                     <button class="btn btn-sm btn-outline--warning confirmationBtn"
-                                                            data-action="{{ route('admin.lottery.phase.distribute', $phase->id) }}"
+                                                            data-action="{{ route('admin.lottery.phases.distribute', $phase->id) }}"
                                                             data-question="@lang('Are you sure to distribute prizes now?')">
                                                         <i class="la la-gift"></i> @lang('Distribute')
                                                     </button>
@@ -72,7 +72,7 @@
 
 @push('breadcrumb-plugins')
     @if(request()->campaign_id)
-        <a href="{{ route('admin.lottery.phase.create', request()->campaign_id) }}" class="btn btn-sm btn-outline--primary">
+        <a href="{{ route('admin.lottery.phases.create', request()->campaign_id) }}" class="btn btn-sm btn-outline--primary">
             <i class="la la-plus"></i> @lang('Add New Phase')
         </a>
     @endif

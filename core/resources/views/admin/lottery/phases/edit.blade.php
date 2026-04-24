@@ -89,7 +89,7 @@
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-outline--danger confirmationBtn"
-                                                    data-action="{{ route('admin.lottery.tier.delete', $tier->id) }}"
+                                                    data-action="{{ route('admin.lottery.tiers.delete', $tier->id) }}"
                                                     data-question="@lang('Are you sure to remove this prize tier?')">
                                                 <i class="la la-trash"></i> @lang('Remove')
                                             </button>
@@ -118,7 +118,7 @@
                         <i class="las la-times"></i>
                     </button>
                 </div>
-                <form action="{{ route('admin.lottery.tier.store', $phase->id) }}" method="POST">
+                <form action="{{ route('admin.lottery.tiers.store', $phase->id) }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">

@@ -50,7 +50,7 @@
                                                         data-id="{{ $winner->id }}"
                                                         data-status="{{ $winner->delivery_status }}"
                                                         data-note="{{ $winner->admin_note }}"
-                                                        data-action="{{ route('admin.lottery.winner.delivery', $winner->id) }}">
+                                                        data-action="{{ route('admin.lottery.winners.delivery', $winner->id) }}">
                                                     <i class="la la-truck"></i> @lang('Delivery')
                                                 </button>
                                             @else
@@ -120,7 +120,7 @@
                 modal.find('form').attr('action', $(this).data('action'));
                 modal.find('[name=delivery_status]').val($(this).data('status'));
                 modal.find('[name=admin_note]').val($(this).data('note'));
-                modal.show();
+                modal.modal('show');
             });
         })(jQuery);
     </script>

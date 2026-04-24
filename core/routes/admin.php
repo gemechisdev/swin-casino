@@ -69,28 +69,28 @@ Route::middleware('admin')->group(function () {
     Route::controller('LotteryController')->name('lottery.')->prefix('lottery')->group(function () {
         // Campaigns
         Route::get('campaigns', 'campaigns')->name('campaigns');
-        Route::get('campaign/create', 'campaignCreate')->name('campaign.create');
-        Route::post('campaign/store', 'campaignStore')->name('campaign.store');
-        Route::get('campaign/edit/{id}', 'campaignEdit')->name('campaign.edit');
-        Route::post('campaign/update/{id}', 'campaignUpdate')->name('campaign.update');
-        Route::post('campaign/status/{id}', 'campaignStatus')->name('campaign.status');
+        Route::get('campaign/create', 'campaignCreate')->name('campaigns.create');
+        Route::post('campaign/store', 'campaignStore')->name('campaigns.store');
+        Route::get('campaign/edit/{id}', 'campaignEdit')->name('campaigns.edit');
+        Route::post('campaign/update/{id}', 'campaignUpdate')->name('campaigns.update');
+        Route::post('campaign/status/{id}', 'campaignStatus')->name('campaigns.status');
 
         // Phases
         Route::get('phases', 'phases')->name('phases');
-        Route::get('phase/create/{campaignId}', 'phaseCreate')->name('phase.create');
-        Route::post('phase/store/{campaignId}', 'phaseStore')->name('phase.store');
-        Route::get('phase/edit/{id}', 'phaseEdit')->name('phase.edit');
-        Route::post('phase/update/{id}', 'phaseUpdate')->name('phase.update');
-        Route::post('phase/draw/{id}', 'phaseDraw')->name('phase.draw');
-        Route::post('phase/distribute/{id}', 'phaseDistribute')->name('phase.distribute');
+        Route::get('phase/create/{campaignId}', 'phaseCreate')->name('phases.create');
+        Route::post('phase/store/{campaignId}', 'phaseStore')->name('phases.store');
+        Route::get('phase/edit/{id}', 'phaseEdit')->name('phases.edit');
+        Route::post('phase/update/{id}', 'phaseUpdate')->name('phases.update');
+        Route::post('phase/draw/{id}', 'phaseDraw')->name('phases.draw');
+        Route::post('phase/distribute/{id}', 'phaseDistribute')->name('phases.distribute');
 
         // Prize Tiers
-        Route::post('tier/store/{phaseId}', 'tierStore')->name('tier.store');
-        Route::post('tier/delete/{id}', 'tierDelete')->name('tier.delete');
+        Route::post('tier/store/{phaseId}', 'tiers.store')->name('tiers.store');
+        Route::post('tier/delete/{id}', 'tiers.delete')->name('tiers.delete');
 
         // Winners & Tickets
         Route::get('winners', 'winners')->name('winners');
-        Route::post('winner/delivery/{id}', 'winnerUpdateDelivery')->name('winner.delivery');
+        Route::post('winner/delivery/{id}', 'winners.delivery')->name('winners.delivery');
         Route::get('tickets', 'tickets')->name('tickets');
     });
 

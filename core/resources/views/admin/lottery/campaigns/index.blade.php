@@ -41,13 +41,13 @@
                                                 </a>
                                                 @if ($campaign->status == Status::DISABLE)
                                                     <button class="btn btn-sm btn-outline--success confirmationBtn"
-                                                            data-action="{{ route('admin.lottery.campaign.status', $campaign->id) }}"
+                                                            data-action="{{ route('admin.lottery.campaigns.status', $campaign->id) }}"
                                                             data-question="@lang('Are you sure to enable this campaign?')" type="button">
                                                         <i class="la la-eye"></i> @lang('Enable')
                                                     </button>
                                                 @else
                                                     <button class="btn btn-sm btn-outline--danger confirmationBtn"
-                                                            data-action="{{ route('admin.lottery.campaign.status', $campaign->id) }}"
+                                                            data-action="{{ route('admin.lottery.campaigns.status', $campaign->id) }}"
                                                             data-question="@lang('Are you sure to disable this campaign?')" type="button">
                                                         <i class="la la-eye-slash"></i> @lang('Disable')
                                                     </button>
@@ -76,7 +76,7 @@
 @endsection
 
 @push('breadcrumb-plugins')
-    <a href="{{ route('admin.lottery.campaign.create') }}" class="btn btn-sm btn-outline--primary">
+    <a href="{{ route('admin.lottery.campaigns.create') }}" class="btn btn-sm btn-outline--primary">
         <i class="la la-plus"></i> @lang('Add New Campaign')
     </a>
 @endpush
