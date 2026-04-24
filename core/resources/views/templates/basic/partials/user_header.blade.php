@@ -37,7 +37,6 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li><a href="{{ route('user.referrals') }}">@lang('Referrals')</a></li>
                             <li class="menu_has_children">
                                 <a href="#">@lang('Reports')</a>
                                 <ul class="sub-menu">
@@ -56,19 +55,21 @@
                             <li class="menu_has_children">
                                 <a href="#">@lang('Account')</a>
                                 <ul class="sub-menu">
+                                    <li><a href="{{ route('user.referrals') }}">@lang('Referrals')</a></li>
                                     @if (gs('balance_transfer'))
                                         <li><a href="{{ route('user.transfer.index') }}">@lang('Balance Transfer')</a></li>
                                     @endif
                                     <li><a href="{{ route('user.profile.setting') }}">@lang('Profile Setting')</a></li>
                                     <li><a href="{{ route('user.change.password') }}">@lang('Change Password')</a></li>
                                     <li><a href="{{ route('user.twofactor') }}">@lang('2FA Security')</a></li>
+                                    <li><a href="{{ route('user.logout') }}">@lang('Logout')</a></li>
                                 </ul>
                             </li>
                         </ul>
                     @endauth
 
                     <div class="nav-right">
-                        <a href="{{ route('user.logout') }}"><i class="las la-sign-out-alt"></i> @lang('Logout')</a>
+                        {{-- Logout moved to Account menu --}}
                         @include('Template::partials.language')
                     </div>
                 </div>

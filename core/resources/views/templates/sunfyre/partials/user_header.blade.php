@@ -39,9 +39,6 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('user.referrals') }}">@lang('Referrals')</a>
-                    </li>
                     <li class="menu_has_children nav-item">
                         <a href="#" class="nav-link">@lang('Reports')</a>
                         <ul class="sub-menu">
@@ -60,19 +57,14 @@
                     <li class="menu_has_children nav-item">
                         <a href="#" class="nav-link">@lang('Account')</a>
                         <ul class="sub-menu">
+                            <li><a href="{{ route('user.referrals') }}">@lang('Referrals')</a></li>
                             @if (gs('balance_transfer'))
                                 <li><a href="{{ route('user.transfer.index') }}">@lang('Balance Transfer')</a></li>
                             @endif
                             <li><a href="{{ route('user.profile.setting') }}">@lang('Profile Setting')</a></li>
                             <li><a href="{{ route('user.change.password') }}">@lang('Change Password')</a></li>
                             <li><a href="{{ route('user.twofactor') }}">@lang('2FA Security')</a></li>
-                        </ul>
-                    </li>
-                    <li class="pt-3 pb-2 d-xl-none">
-                        <ul class="flex-align gap-3">
-                            <li class="login-registration-list__item">
-                                <a href="{{ route('user.logout') }}" class="btn btn--gradient">@lang('Logout')</a>
-                            </li>
+                            <li><a href="{{ route('user.logout') }}">@lang('Logout')</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -80,9 +72,7 @@
             <div class="header-right d-none d-xl-block">
                 <div class="top-button d-flex flex-wrap justify-content-between align-items-center">
                     <ul class="login-registration-list flex-wrap gap-3 align-items-center">
-                        <li class="login-registration-list__item">
-                            <a href="{{ route('user.logout') }}" class="btn btn--gradient">@lang('Logout')</a>
-                        </li>
+                        {{-- Logout moved to Account menu --}}
                     </ul>
                 </div>
             </div>
