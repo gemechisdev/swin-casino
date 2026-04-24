@@ -177,6 +177,8 @@ jobs:
     name: 🚢 Deploy
     runs-on: ubuntu-latest
     needs: [preflight, build]
+    outputs:
+      has_env: ${{ steps.remote-state.outputs.has_env }}
     environment:
       name: production
       url: ${{ env.APP_URL }}
@@ -201,6 +203,21 @@ jobs:
           # Add host key fingerprint to known_hosts (avoids interactive prompt)
           ssh-keyscan -p "$DEPLOY_PORT" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
           echo "✓ SSH agent configured."
+
+      # ── REMOTE ENVIRONMENT CHECK ─────────────────────────────
+      - name: Check remote environment state
+        id: remote-state
+        run: |
+          set -euo pipefail
+          # Check for .env file existence
+          STATE=$(ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "[ -f ${{ secrets.APP_PATH }}/core/.env ] && echo 'exists' || echo 'missing'")
+          if [ "$STATE" = "exists" ]; then
+            echo "has_env=true" >> "$GITHUB_OUTPUT"
+            echo "✓ .env file found on remote server."
+          else
+            echo "has_env=false" >> "$GITHUB_OUTPUT"
+            echo "⚠ No .env file found on remote server."
+          fi
 
       # ── REMOTE PHP VALIDATION ────────────────────────────────
       - name: Validate remote PHP 8.2+ availability
@@ -307,7 +324,24 @@ jobs:
             --exclude='assets/templates/sunfyre/css/custom.css'
           )
 
-          if [ "$DEPLOY_INSTALLER" != "true" ]; then
+          # Determine if we should deploy the installer folder.
+          # Logic:
+          # 1. If .env exists on server -> NEVER deploy /install (security).
+          # 2. If .env is missing -> ALWAYS deploy /install (allow setup).
+          EFFECTIVE_DEPLOY_INSTALLER="$DEPLOY_INSTALLER"
+          if [ "${{ steps.remote-state.outputs.has_env }}" = "true" ]; then
+            if [ "$DEPLOY_INSTALLER" = "true" ]; then
+              echo "⚠ DEPLOY_INSTALLER was set to true, but .env already exists. Forcing exclusion of /install for security."
+            fi
+            EFFECTIVE_DEPLOY_INSTALLER="false"
+          else
+            if [ "$DEPLOY_INSTALLER" = "false" ]; then
+              echo "ℹ .env missing on server. Forcing inclusion of /install to allow initial configuration."
+            fi
+            EFFECTIVE_DEPLOY_INSTALLER="true"
+          fi
+
+          if [ "$EFFECTIVE_DEPLOY_INSTALLER" != "true" ]; then
             EXCLUDES+=(--exclude='install/')
           fi
 
@@ -388,9 +422,19 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$DEPLOY_PORT" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
+      # ── SECURITY CLEANUP ─────────────────────────────────────
+      - name: Security cleanup (Remove installer)
+        if: needs.deploy.outputs.has_env == 'true'
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "rm -rf ${{ secrets.APP_PATH }}/install"
+          echo "✓ Security cleanup: /install folder removed."
+
       # ── VALIDATE .env ────────────────────────────────────────
       - name: Validate .env configuration
-        if: env.DEPLOY_INSTALLER != 'true'
+        if: needs.deploy.outputs.has_env == 'true'
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p "$DEPLOY_PORT" \
@@ -463,7 +507,7 @@ jobs:
 
       # ── LARAVEL CACHE WARM ───────────────────────────────────
       - name: Warm Laravel application caches
-        if: env.DEPLOY_INSTALLER != 'true' && env.SKIP_CACHE_WARM != 'true'
+        if: needs.deploy.outputs.has_env == 'true' && env.SKIP_CACHE_WARM != 'true'
         run: |
           ssh -i ~/.ssh/deploy_key \
               -p "$DEPLOY_PORT" \
@@ -518,7 +562,7 @@ jobs:
 
       # ── HTTP HEALTH CHECK ────────────────────────────────────
       - name: HTTP health check
-        if: env.DEPLOY_INSTALLER != 'true'
+        if: needs.deploy.outputs.has_env == 'true'
         run: |
           HEALTH_URL="${{ secrets.HEALTH_CHECK_URL || env.APP_URL }}"
           echo "▶ Pinging $HEALTH_URL …"
@@ -566,15 +610,16 @@ jobs:
           echo "  Root .htaccess           : $([ -f "$BASE/.htaccess" ]                    && echo '✓' || echo '✗')"
           echo "  Composer autoload        : $([ -f "$BASE/core/vendor/autoload.php" ]     && echo '✓' || echo '✗')"
           echo ""
-          if [ "${{ env.DEPLOY_INSTALLER }}" = "true" ]; then
-            echo "── Installer mode ───────────────────────"
-            echo "  install/index.php        : $([ -f "$BASE/install/index.php" ]          && echo '✓' || echo '✗')"
-            echo "  .env intentionally absent until web setup completes"
-          else
+          if [ "${{ needs.deploy.outputs.has_env }}" = "true" ]; then
             echo "── Environment & cache ──────────────────"
             echo "  .env file                : $([ -f "$BASE/core/.env" ]                  && echo '✓' || echo '✗')"
             echo "  Config cache             : $([ -f "$BASE/core/bootstrap/cache/config.php" ] && echo '✓' || echo '✗')"
             echo "  Route cache              : $([ -f "$BASE/core/bootstrap/cache/routes-v7.php" ] 2>/dev/null && echo '✓' || echo '?')"
+          else
+            echo "── Installer mode ───────────────────────"
+            echo "  install/index.php        : $([ -f "$BASE/install/index.php" ]          && echo '✓' || echo '✗')"
+            echo "  .env status              : ✗ (Waiting for web setup)"
+            echo "  Action required          : Visit $APP_URL/install to complete setup."
           fi
           echo ""
           echo "── Runtime directories ──────────────────"
