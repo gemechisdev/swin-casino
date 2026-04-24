@@ -30,7 +30,7 @@ class LotteryController extends Controller
             }])
             ->paginate(getPaginate());
 
-        return view($this->activeTemplate . 'user.lottery.index', compact('pageTitle', 'lotteries'));
+        return view('Template::user.lottery.index', compact('pageTitle', 'lotteries'));
     }
 
     public function show($id)
@@ -54,7 +54,7 @@ class LotteryController extends Controller
             ->take(10)
             ->get();
 
-        return view($this->activeTemplate . 'user.lottery.show', compact('pageTitle', 'campaign', 'phase', 'prizeTiers', 'recentWinners'));
+        return view('Template::user.lottery.show', compact('pageTitle', 'campaign', 'phase', 'prizeTiers', 'recentWinners'));
     }
 
     public function buyTickets(Request $request, $id)
@@ -84,7 +84,7 @@ class LotteryController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(getPaginate());
 
-        return view($this->activeTemplate . 'user.lottery.my_tickets', compact('pageTitle', 'tickets'));
+        return view('Template::user.lottery.my_tickets', compact('pageTitle', 'tickets'));
     }
 
     public function winners(Request $request)
@@ -101,7 +101,7 @@ class LotteryController extends Controller
         }
 
         $winners = $winners->paginate(getPaginate());
-        return view($this->activeTemplate . 'user.lottery.winners', compact('pageTitle', 'winners'));
+        return view('Template::user.lottery.winners', compact('pageTitle', 'winners'));
     }
 
     public function history()
@@ -112,6 +112,6 @@ class LotteryController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(getPaginate());
 
-        return view($this->activeTemplate . 'user.lottery.history', compact('pageTitle', 'logs'));
+        return view('Template::user.lottery.history', compact('pageTitle', 'logs'));
     }
 }
