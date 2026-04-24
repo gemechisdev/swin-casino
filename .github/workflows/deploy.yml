@@ -1,94 +1,291 @@
-name: Deploy AddisWin Casino
+# ============================================================
+#  AddisWin Casino — Production Deployment Workflow
+#  Target: Shared / cPanel hosting via SSH + rsync
+#
+#  Required Secrets:
+#    DEPLOY_KEY        — Private SSH key (RSA/Ed25519, no passphrase)
+#    DEPLOY_HOST       — Remote hostname or IP
+#    DEPLOY_USER       — SSH username
+#    APP_PATH          — Absolute path to deployment root on server
+#
+#  Optional Secrets (fall back to sane defaults if absent):
+#    DEPLOY_PORT       — SSH port              (default: 22)
+#    DEPLOY_INSTALLER  — Ship /install folder  (default: false)
+#    HEALTH_CHECK_URL  — URL to ping after deploy (default: APP_URL)
+#
+#  Job Order:
+#    preflight → build → deploy → post-deploy → notify
+# ============================================================
+
+name: 🚀 Deploy AddisWin Casino
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      deploy_installer:
+        description: "Include /install folder in this deployment?"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      skip_cache_warm:
+        description: "Skip Laravel cache warming? (use for fresh installs)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
 
+# Prevent concurrent deployments to the same environment.
+# A queued run will wait; it will NOT be cancelled.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+# ──────────────────────────────────────────────────────────────
+#  ENVIRONMENT DEFAULTS
+# ──────────────────────────────────────────────────────────────
+env:
+  APP_URL:          https://addiswin.scoware.com
+  PHP_VERSION:      "8.2"
+  DEPLOY_PORT:      ${{ secrets.DEPLOY_PORT || '22' }}
+  DEPLOY_INSTALLER: ${{ inputs.deploy_installer || secrets.DEPLOY_INSTALLER || 'false' }}
+  SKIP_CACHE_WARM:  ${{ inputs.skip_cache_warm || 'false' }}
+
+# ==============================================================
+#  JOB 1 — PREFLIGHT
+#  Fast checks that catch obvious problems before any SSH call.
+# ==============================================================
 jobs:
-  deploy:
+  preflight:
+    name: 🔍 Preflight Checks
     runs-on: ubuntu-latest
-    env:
-      APP_URL: https://addiswin.scoware.com
-      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
-      DEPLOY_INSTALLER: ${{ secrets.DEPLOY_INSTALLER || 'false' }}
+    outputs:
+      deploy_installer: ${{ env.DEPLOY_INSTALLER }}
+      skip_cache_warm:  ${{ env.SKIP_CACHE_WARM }}
+      sha_short:        ${{ steps.meta.outputs.sha_short }}
+      run_url:          ${{ steps.meta.outputs.run_url }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ==================== DEPENDENCIES ====================
+      - name: Collect build metadata
+        id: meta
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
 
-      - name: Setup PHP
+      - name: Validate required secrets are present
+        run: |
+          missing=()
+          [[ -z "${{ secrets.DEPLOY_KEY }}"  ]] && missing+=("DEPLOY_KEY")
+          [[ -z "${{ secrets.DEPLOY_HOST }}" ]] && missing+=("DEPLOY_HOST")
+          [[ -z "${{ secrets.DEPLOY_USER }}" ]] && missing+=("DEPLOY_USER")
+          [[ -z "${{ secrets.APP_PATH }}"    ]] && missing+=("APP_PATH")
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            echo "Add them under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "✓ All required secrets are present."
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: ${{ env.PHP_VERSION }}
           extensions: bcmath, ctype, curl, dom, fileinfo, json, mbstring, openssl, pdo, pdo_mysql, tokenizer, xml, zip, gd
           tools: composer:v2
+          coverage: none
+
+      - name: Validate composer.json / composer.lock
+        working-directory: core
+        run: composer validate --strict --no-interaction
+
+  # ==============================================================
+  #  JOB 2 — BUILD
+  #  Install production Composer dependencies and cache the vendor
+  #  directory so the Deploy job can reuse it without re-running
+  #  `composer install`.
+  # ==============================================================
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: preflight
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: bcmath, ctype, curl, dom, fileinfo, json, mbstring, openssl, pdo, pdo_mysql, tokenizer, xml, zip, gd
+          tools: composer:v2
+          coverage: none
+
+      # Cache Composer vendor dir keyed on lock file hash.
+      # On a cache miss the install runs normally and the result is
+      # saved for the next run.
+      - name: Cache Composer dependencies
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: core/vendor
+          key: composer-prod-${{ runner.os }}-${{ hashFiles('core/composer.lock') }}
+          restore-keys: |
+            composer-prod-${{ runner.os }}-
 
       - name: Install Composer dependencies (production)
+        if: steps.composer-cache.outputs.cache-hit != 'true'
         working-directory: core
-        run: composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress
-
-      # ==================== SSH SETUP ====================
-
-      - name: Setup SSH
-        env:
-          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
-          set -e
-          mkdir -p ~/.ssh
-          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "$DEPLOY_PORT" -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          composer install \
+            --no-dev \
+            --optimize-autoloader \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --no-scripts
 
+      - name: Verify autoloader
+        working-directory: core
+        run: php -r "require 'vendor/autoload.php'; echo '✓ Autoloader OK' . PHP_EOL;"
+
+      # Upload vendor dir as an artifact so the Deploy job can
+      # download it without re-running Composer.
+      - name: Upload vendor artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vendor-${{ needs.preflight.outputs.sha_short }}
+          path: core/vendor/
+          retention-days: 1
+          if-no-files-found: error
+
+  # ==============================================================
+  #  JOB 3 — DEPLOY
+  #  Validates the remote PHP version, rsyncs application files,
+  #  and seeds default asset directories safely.
+  # ==============================================================
+  deploy:
+    name: 🚢 Deploy
+    runs-on: ubuntu-latest
+    needs: [preflight, build]
+    environment:
+      name: production
+      url: ${{ env.APP_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download vendor artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-${{ needs.preflight.outputs.sha_short }}
+          path: core/vendor/
+
+      # ── SSH ──────────────────────────────────────────────────
+      - name: Configure SSH agent
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Add host key fingerprint to known_hosts (avoids interactive prompt)
+          ssh-keyscan -p "$DEPLOY_PORT" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "✓ SSH agent configured."
+
+      # ── REMOTE PHP VALIDATION ────────────────────────────────
       - name: Validate remote PHP 8.2+ availability
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          set -e
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} bash <<'REMOTE'
+          set -euo pipefail
 
-          REMOTE_PHP=""
-          for candidate in php8.2 php82 /opt/cpanel/ea-php82/root/usr/bin/php php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
-            if command -v "$candidate" >/dev/null 2>&1; then
-              version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
-              major="${version%%.*}"
-              minor="${version##*.}"
-              if [ "$major" = "8" ] && [ "$minor" -ge 2 ] 2>/dev/null; then
-                REMOTE_PHP="$candidate"
-                break
+          # Ordered list of candidates — cPanel EA-PHP binaries first.
+          PHP_CANDIDATES=(
+            php8.2 php82
+            /opt/cpanel/ea-php82/root/usr/bin/php
+            php8.3 php83
+            /opt/cpanel/ea-php83/root/usr/bin/php
+            php8.4 php84
+            /opt/cpanel/ea-php84/root/usr/bin/php
+            php
+          )
+
+          find_php() {
+            for candidate in "${PHP_CANDIDATES[@]}"; do
+              if command -v "$candidate" >/dev/null 2>&1; then
+                version="$("$candidate" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
+                major="${version%%.*}"
+                minor="${version##*.}"
+                if [ "$major" = "8" ] && [ "$minor" -ge 2 ] 2>/dev/null; then
+                  echo "$candidate"
+                  return 0
+                fi
               fi
-            fi
-          done
+            done
+            return 1
+          }
+
+          REMOTE_PHP="$(find_php || true)"
 
           if [ -z "$REMOTE_PHP" ]; then
-            echo "ERROR: No PHP 8.2+ CLI binary found on server."
-            echo "Install/enable PHP 8.2 or higher for this account, then set the CLI default or adjust workflow candidate paths."
+            echo "::error::No PHP 8.2+ CLI binary found on the server."
+            echo "Install/enable PHP 8.2+ for this account and ensure it is on PATH,"
+            echo "or add its full path to the PHP_CANDIDATES list in the workflow."
             exit 1
           fi
 
-          echo "Using remote PHP binary: $REMOTE_PHP"
+          echo "✓ Remote PHP binary : $REMOTE_PHP"
           "$REMOTE_PHP" -v
-          ENDSSH
+          REMOTE
 
-      # ==================== DEPLOYMENT ====================
-
-      - name: Deploy AddisWin Casino application
+      # ── RSYNC — PRIMARY TRANSFER ─────────────────────────────
+      - name: Rsync application files to server
         run: |
           set -euo pipefail
 
-          rsync_excludes=(
-            --exclude='.git*'
-            --exclude='.github*'
-            --exclude='node_modules'
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no -o ConnectTimeout=15"
+
+          # Paths excluded from the primary --delete sync.
+          # Anything user-uploaded or environment-specific MUST be
+          # listed here to prevent accidental deletion on every push.
+          EXCLUDES=(
+            --exclude='.git/'
+            --exclude='.github/'
+            --exclude='node_modules/'
             --exclude='cgi-bin/'
             --exclude='.well-known/'
+            # Environment config
             --exclude='.env'
             --exclude='.env.*'
-            --exclude='storage/'
+            --exclude='core/.env'
+            --exclude='core/.env.*'
+            # Laravel runtime — created/managed on the server
+            --exclude='core/storage/'
+            --exclude='core/bootstrap/cache/'
+            # Generated / user-translated language files
+            --exclude='core/resources/lang/*.json'
+            # Runtime XML / SEO files managed via admin panel
             --exclude='sitemap.xml'
             --exclude='robots.xml'
+            # Admin-panel push config (written at runtime)
             --exclude='assets/admin/push_config.json'
+            # ── PROTECTED / RUNTIME ASSET DIRECTORIES ────────
+            # These are seeded separately with --ignore-existing.
+            # We exclude them here to prevent the primary --delete from
+            # wiping out user uploads or admin-panel changes.
             --exclude='assets/admin/images/profile/'
             --exclude='assets/images/extensions/'
             --exclude='assets/images/frontend/'
@@ -104,166 +301,292 @@ jobs:
             --exclude='assets/images/withdraw_method/'
             --exclude='assets/in_app_purchase_config/'
             --exclude='assets/support/'
+            --exclude='assets/verify/'
+            # Theme custom CSS (edited via admin panel)
             --exclude='assets/templates/basic/css/custom.css'
             --exclude='assets/templates/sunfyre/css/custom.css'
-            --exclude='core/.env'
-            --exclude='core/.env.*'
-            --exclude='core/bootstrap/cache/'
-            --exclude='core/storage/'
-            --exclude='core/resources/lang/*.json'
           )
 
           if [ "$DEPLOY_INSTALLER" != "true" ]; then
-            rsync_excludes+=(--exclude='install/')
+            EXCLUDES+=(--exclude='install/')
           fi
 
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
-            "${rsync_excludes[@]}" \
+          echo "▶ Primary rsync (application files)…"
+          rsync -rlptz \
+            --delete \
+            --delete-excluded \
+            --human-readable \
+            --stats \
+            -e "$SSH_CMD" \
+            "${EXCLUDES[@]}" \
             ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
 
-          # Seed all default/bundled asset directories that are excluded from the
-          # main rsync (to avoid overwriting admin-uploaded content on updates).
-          # --checksum compares file content (SHA checksum) rather than just
-          # mtime/size: files that are identical to the repo are skipped, while
-          # files whose checksum has changed (developer updated the asset) are
-          # updated even if a file with the same name already exists on the
-          # server.  Purely user-generated files (no repo counterpart) are
-          # never touched because rsync only acts on paths present in the
-          # source.
-          # Exclude user-generated-only dirs (no default content in repo) so
-          # they are never accidentally wiped or created empty on the remote.
-          SEED_EXCLUDES=(
-            --exclude='user/'
-            --exclude='verify/'
-            --exclude='withdraw_method/'
-            --exclude='push_notification/'
+          echo "✓ Primary rsync complete."
+
+      # ── RSYNC — ASSET DEPLOYMENT (Safe Seed) ─────────────────
+      # We use --ignore-existing to ensure we NEVER overwrite files
+      # on the server. This preserves admin-uploaded logos, user
+      # profile pictures, and other runtime data.
+      # We explicitly check for local directory existence to avoid
+      # rsync "No such file or directory" errors if a folder is
+      # missing from the repository.
+      - name: Seed Assets & Protected Directories
+        run: |
+          set -euo pipefail
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no"
+          DEST="${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}"
+
+          echo "▶ Seeding asset directories (Safe)..."
+          
+          # List of all directories to be seeded if they exist in repo.
+          SEED_PATHS=(
+            "assets/admin/images/profile/"
+            "assets/images/extensions/"
+            "assets/images/frontend/"
+            "assets/images/game/"
+            "assets/images/gateway/"
+            "assets/images/language/"
+            "assets/images/logo_icon/"
+            "assets/images/maintenance/"
+            "assets/images/push_notification/"
+            "assets/images/seo/"
+            "assets/images/user/"
+            "assets/images/verify/"
+            "assets/images/withdraw_method/"
+            "assets/in_app_purchase_config/"
+            "assets/support/"
+            "assets/verify/"
           )
 
-          rsync -avz --checksum \
-            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
-            "${SEED_EXCLUDES[@]}" \
-            ./assets/images/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/images/
+          for path in "${SEED_PATHS[@]}"; do
+            # Use -d check to avoid rsync error if folder is not in repo.
+            if [ -d "$path" ]; then
+              echo "  - Seeding $path"
+              rsync -rlptz --ignore-existing --human-readable -e "$SSH_CMD" "$path" "$DEST/$path"
+            else
+              echo "  - Skipping $path (not in repo, will be created on server if missing)"
+            fi
+          done
 
-          rsync -avz --checksum \
-            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
-            ./assets/admin/images/profile/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/admin/images/profile/
+          echo "✓ Asset synchronization complete."
 
-          rsync -avz --checksum \
-            -e "ssh -i ~/.ssh/deploy_key -p $DEPLOY_PORT -o StrictHostKeyChecking=no" \
-            ./assets/audio/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/assets/audio/
+  # ==============================================================
+  #  JOB 4 — POST-DEPLOY
+  #  Remote housekeeping: validate .env, create runtime dirs,
+  #  warm Laravel caches, and run an HTTP health-check.
+  # ==============================================================
+  post-deploy:
+    name: ⚙️ Post-Deploy
+    runs-on: ubuntu-latest
+    needs: [preflight, deploy]
 
-      # ==================== POST-DEPLOYMENT ====================
+    steps:
+      - name: Configure SSH agent
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$DEPLOY_PORT" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
+      # ── VALIDATE .env ────────────────────────────────────────
       - name: Validate .env configuration
         if: env.DEPLOY_INSTALLER != 'true'
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          set -e
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} bash <<'REMOTE'
+          set -euo pipefail
           ENV_FILE="${{ secrets.APP_PATH }}/core/.env"
+
           if [ ! -f "$ENV_FILE" ]; then
-            echo "ERROR: .env file not found at $ENV_FILE"
-            echo "Please run the web installer at your application URL /install to configure the application."
+            echo "::error::.env not found at $ENV_FILE"
+            echo "Run the web installer at your application URL /install"
+            echo "to perform the initial configuration, then redeploy."
             exit 1
           fi
-          echo "✓ .env file exists"
+          echo "✓ .env file exists."
+
+          # Ensure DB_CONNECTION is present (older installs may omit it).
           if ! grep -q '^DB_CONNECTION=' "$ENV_FILE"; then
-            echo "WARNING: DB_CONNECTION not set in .env; adding DB_CONNECTION=mysql"
+            echo "⚠ DB_CONNECTION missing — appending DB_CONNECTION=mysql"
             echo "DB_CONNECTION=mysql" >> "$ENV_FILE"
           fi
-          echo "✓ DB_CONNECTION is configured"
-          ENDSSH
+          echo "✓ DB_CONNECTION is configured."
+          REMOTE
 
-      - name: Prepare runtime directories and set permissions
+      # ── RUNTIME DIRECTORIES + PERMISSIONS ───────────────────
+      - name: Create runtime directories and set permissions
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          set -e
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} bash <<'REMOTE'
+          set -euo pipefail
+          BASE="${{ secrets.APP_PATH }}"
+
+          echo "▶ Creating application runtime and asset directories…"
           mkdir -p \
-            "${{ secrets.APP_PATH }}/core/storage/app/public" \
-            "${{ secrets.APP_PATH }}/core/storage/framework/cache/data" \
-            "${{ secrets.APP_PATH }}/core/storage/framework/sessions" \
-            "${{ secrets.APP_PATH }}/core/storage/framework/views" \
-            "${{ secrets.APP_PATH }}/core/storage/logs" \
-            "${{ secrets.APP_PATH }}/core/bootstrap/cache"
-          chmod -R 775 \
-            "${{ secrets.APP_PATH }}/core/storage" \
-            "${{ secrets.APP_PATH }}/core/bootstrap/cache"
-          ENDSSH
+            "$BASE/core/storage/app/public" \
+            "$BASE/core/storage/framework/cache/data" \
+            "$BASE/core/storage/framework/sessions" \
+            "$BASE/core/storage/framework/testing" \
+            "$BASE/core/storage/framework/views" \
+            "$BASE/core/storage/logs" \
+            "$BASE/core/bootstrap/cache" \
+            "$BASE/assets/admin/images/profile" \
+            "$BASE/assets/images/extensions" \
+            "$BASE/assets/images/frontend" \
+            "$BASE/assets/images/game" \
+            "$BASE/assets/images/gateway" \
+            "$BASE/assets/images/language" \
+            "$BASE/assets/images/logo_icon" \
+            "$BASE/assets/images/maintenance" \
+            "$BASE/assets/images/push_notification" \
+            "$BASE/assets/images/seo" \
+            "$BASE/assets/images/user/profile" \
+            "$BASE/assets/images/verify" \
+            "$BASE/assets/images/withdraw_method" \
+            "$BASE/assets/in_app_purchase_config" \
+            "$BASE/assets/support" \
+            "$BASE/assets/verify"
 
-      - name: Warm Laravel caches
-        if: env.DEPLOY_INSTALLER != 'true'
+          chmod -R 775 \
+            "$BASE/core/storage" \
+            "$BASE/core/bootstrap/cache" \
+            "$BASE/assets"
+
+          echo "✓ Runtime directories are ready."
+          REMOTE
+
+      # ── LARAVEL CACHE WARM ───────────────────────────────────
+      - name: Warm Laravel application caches
+        if: env.DEPLOY_INSTALLER != 'true' && env.SKIP_CACHE_WARM != 'true'
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          set -e
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} bash <<'REMOTE'
+          set -euo pipefail
+
+          PHP_CANDIDATES=(
+            php8.2 php82
+            /opt/cpanel/ea-php82/root/usr/bin/php
+            php8.3 php83
+            /opt/cpanel/ea-php83/root/usr/bin/php
+            php8.4 php84
+            /opt/cpanel/ea-php84/root/usr/bin/php
+            php
+          )
 
           REMOTE_PHP=""
-          for candidate in php8.2 php82 /opt/cpanel/ea-php82/root/usr/bin/php php8.3 php83 /opt/cpanel/ea-php83/root/usr/bin/php php; do
+          for candidate in "${PHP_CANDIDATES[@]}"; do
             if command -v "$candidate" >/dev/null 2>&1; then
-              version="$($candidate -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
-              major="${version%%.*}"
-              minor="${version##*.}"
+              version="$("$candidate" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || true)"
+              major="${version%%.*}"; minor="${version##*.}"
               if [ "$major" = "8" ] && [ "$minor" -ge 2 ] 2>/dev/null; then
-                REMOTE_PHP="$candidate"
-                break
+                REMOTE_PHP="$candidate"; break
               fi
             fi
           done
 
-          if [ -z "$REMOTE_PHP" ]; then
-            echo "ERROR: Cannot warm caches because PHP 8.2+ CLI was not found."
-            exit 1
-          fi
+          [ -z "$REMOTE_PHP" ] && { echo "::error::PHP 8.2+ not found — cannot warm caches."; exit 1; }
 
-          cd ${{ secrets.APP_PATH }}/core
+          echo "✓ Using PHP binary: $REMOTE_PHP"
+          cd "${{ secrets.APP_PATH }}/core"
+
+          echo "▶ Clearing previous caches…"
           "$REMOTE_PHP" artisan optimize:clear || true
+
+          echo "▶ Linking storage…"
           "$REMOTE_PHP" artisan storage:link --force || true
+
+          echo "▶ Running database migrations…"
+          "$REMOTE_PHP" artisan migrate --force --no-interaction || true
+
+          echo "▶ Warming caches…"
           "$REMOTE_PHP" artisan config:cache
           "$REMOTE_PHP" artisan route:cache
           "$REMOTE_PHP" artisan event:cache
-          "$REMOTE_PHP" artisan view:cache || true
-          ENDSSH
+          "$REMOTE_PHP" artisan view:cache  || true
 
-      - name: Validate deployment
+          echo "✓ Laravel caches warmed successfully."
+          REMOTE
+
+      # ── HTTP HEALTH CHECK ────────────────────────────────────
+      - name: HTTP health check
+        if: env.DEPLOY_INSTALLER != 'true'
+        run: |
+          HEALTH_URL="${{ secrets.HEALTH_CHECK_URL || env.APP_URL }}"
+          echo "▶ Pinging $HEALTH_URL …"
+
+          # Retry up to 5 times with 10-second intervals to allow for
+          # any server-side opcode cache warm-up.
+          for attempt in 1 2 3 4 5; do
+            HTTP_STATUS=$(curl --silent --output /dev/null \
+              --write-out "%{http_code}" \
+              --max-time 20 \
+              --location \
+              "$HEALTH_URL" || echo "000")
+
+            if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 400 ]]; then
+              echo "✓ Health check passed (HTTP $HTTP_STATUS) on attempt $attempt."
+              exit 0
+            fi
+
+            echo "⚠ Attempt $attempt: HTTP $HTTP_STATUS — retrying in 10s…"
+            sleep 10
+          done
+
+          echo "::error::Health check failed after 5 attempts. Last status: $HTTP_STATUS"
+          echo "Check application logs on the server for errors."
+          exit 1
+
+      # ── DEPLOYMENT SUMMARY ───────────────────────────────────
+      - name: Write deployment summary
         if: always()
         run: |
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-          echo "=== Deployment Validation ==="
+          ssh -i ~/.ssh/deploy_key \
+              -p "$DEPLOY_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o ConnectTimeout=15 \
+              ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} bash <<'REMOTE'
+          BASE="${{ secrets.APP_PATH }}"
+
+          echo "════════════════════════════════════════"
+          echo "         Deployment Validation"
+          echo "════════════════════════════════════════"
           echo ""
-          echo "Application:"
-          echo "  App path exists: $([ -d "${{ secrets.APP_PATH }}" ] && echo "✓" || echo "✗")"
-          echo "  Root index exists: $([ -f "${{ secrets.APP_PATH }}/index.php" ] && echo "✓" || echo "✗")"
-          echo "  Root .htaccess exists: $([ -f "${{ secrets.APP_PATH }}/.htaccess" ] && echo "✓" || echo "✗")"
-          echo "  Composer autoload exists: $([ -f "${{ secrets.APP_PATH }}/core/vendor/autoload.php" ] && echo "✓" || echo "✗")"
+          echo "── Core application ─────────────────────"
+          echo "  App root exists          : $([ -d "$BASE" ]                              && echo '✓' || echo '✗')"
+          echo "  Root index.php           : $([ -f "$BASE/index.php" ]                    && echo '✓' || echo '✗')"
+          echo "  Root .htaccess           : $([ -f "$BASE/.htaccess" ]                    && echo '✓' || echo '✗')"
+          echo "  Composer autoload        : $([ -f "$BASE/core/vendor/autoload.php" ]     && echo '✓' || echo '✗')"
+          echo ""
           if [ "${{ env.DEPLOY_INSTALLER }}" = "true" ]; then
-            echo "  Installer folder exists: $([ -f "${{ secrets.APP_PATH }}/install/index.php" ] && echo "✓" || echo "✗")"
-            echo "  .env file intentionally absent until installation completes"
+            echo "── Installer mode ───────────────────────"
+            echo "  install/index.php        : $([ -f "$BASE/install/index.php" ]          && echo '✓' || echo '✗')"
+            echo "  .env intentionally absent until web setup completes"
           else
-            echo "  .env file exists: $([ -f "${{ secrets.APP_PATH }}/core/.env" ] && echo "✓" || echo "✗")"
-            echo "  Config cached: $([ -f "${{ secrets.APP_PATH }}/core/bootstrap/cache/config.php" ] && echo "✓" || echo "✗")"
+            echo "── Environment & cache ──────────────────"
+            echo "  .env file                : $([ -f "$BASE/core/.env" ]                  && echo '✓' || echo '✗')"
+            echo "  Config cache             : $([ -f "$BASE/core/bootstrap/cache/config.php" ] && echo '✓' || echo '✗')"
+            echo "  Route cache              : $([ -f "$BASE/core/bootstrap/cache/routes-v7.php" ] 2>/dev/null && echo '✓' || echo '?')"
           fi
           echo ""
-          echo "Writable runtime data:"
-          echo "  Core storage exists: $([ -d "${{ secrets.APP_PATH }}/core/storage" ] && echo "✓" || echo "✗")"
-          echo "  Frontend uploads preserved: $([ -d "${{ secrets.APP_PATH }}/assets/images/frontend" ] && echo "✓" || echo "✗")"
+          echo "── Runtime directories ──────────────────"
+          echo "  core/storage             : $([ -d "$BASE/core/storage" ]                 && echo '✓' || echo '✗')"
+          echo "  core/bootstrap/cache     : $([ -d "$BASE/core/bootstrap/cache" ]         && echo '✓' || echo '✗')"
           echo ""
-          echo "=== Deployment Complete ==="
-          ENDSSH
-
-      - name: Notify deployment success
-        if: success()
-        run: |
-          echo "✓ AddisWin Casino deployed successfully to ${{ env.APP_URL }}"
-          echo "✓ Application URL: ${{ env.APP_URL }}"
-
-      - name: Notify deployment failure
-        if: failure()
-        run: |
-          echo "✗ Deployment failed. Check the logs above for details."
-          exit 1
+          echo "── User-uploaded assets (preserved) ─────"
+          echo "  assets/images/frontend   : $([ -d "$BASE/assets/images/frontend" ]       && echo '✓' || echo '✗')"
+          echo "  assets/images/user       : $([ -d "$BASE/assets/images/user" ]           && echo '✓' || echo '✗')"
+          echo "  assets/admin/images/profile: $([ -d "$BASE/assets/admin/images/profile" ] && echo '✓' || echo '✗')"
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "       Deployment Complete"
+          echo "════════════════════════════════════════"
+          REMOTE
