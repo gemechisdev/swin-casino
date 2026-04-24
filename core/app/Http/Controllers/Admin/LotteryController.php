@@ -153,9 +153,9 @@ class LotteryController extends Controller
         $phase = new LotteryPhase();
         $phase->lottery_campaign_id = $campaign->id;
         $phase->phase_number        = $request->phase_number;
-        $phase->sale_start_at       = $request->sale_start_at;
-        $phase->sale_end_at         = $request->sale_end_at;
-        $phase->draw_at             = $request->draw_at;
+        $phase->sale_start_at       = \Carbon\Carbon::parse($request->sale_start_at);
+        $phase->sale_end_at         = \Carbon\Carbon::parse($request->sale_end_at);
+        $phase->draw_at             = \Carbon\Carbon::parse($request->draw_at);
         $phase->status              = Status::LOTTERY_PHASE_PENDING;
         $phase->save();
 
@@ -182,9 +182,9 @@ class LotteryController extends Controller
         ]);
 
         $phase->phase_number  = $request->phase_number;
-        $phase->sale_start_at = $request->sale_start_at;
-        $phase->sale_end_at   = $request->sale_end_at;
-        $phase->draw_at       = $request->draw_at;
+        $phase->sale_start_at = \Carbon\Carbon::parse($request->sale_start_at);
+        $phase->sale_end_at   = \Carbon\Carbon::parse($request->sale_end_at);
+        $phase->draw_at       = \Carbon\Carbon::parse($request->draw_at);
         $phase->status        = $request->status;
         $phase->save();
 

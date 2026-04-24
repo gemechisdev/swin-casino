@@ -19,19 +19,19 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('Sale Start At')</label>
-                                    <input type="text" name="sale_start_at" value="{{ $phase->sale_start_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" required>
+                                    <input type="text" name="sale_start_at" value="{{ $phase->sale_start_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" data-time-format="hh:ii aa" required>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('Sale End At')</label>
-                                    <input type="text" name="sale_end_at" value="{{ $phase->sale_end_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" required>
+                                    <input type="text" name="sale_end_at" value="{{ $phase->sale_end_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" data-time-format="hh:ii aa" required>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('Draw At')</label>
-                                    <input type="text" name="draw_at" value="{{ $phase->draw_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" required>
+                                    <input type="text" name="draw_at" value="{{ $phase->draw_at }}" class="form-control datepicker-here" data-language="en" data-date-format="yyyy-mm-dd" data-timepicker="true" data-time-format="hh:ii aa" required>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -167,16 +167,43 @@
     <x-confirmation-modal />
 @endsection
 
+@push('style-lib')
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/admin/css/daterangepicker.css') }}">
+@endpush
+
 @push('style')
-    <link rel="stylesheet" href="{{ asset('assets/admin/css/vendor/datepicker.min.css') }}">
+    <style>
+        .daterangepicker {
+            z-index: 9999 !important;
+        }
+    </style>
+@endpush
+
+@push('script-lib')
+    <script src="{{ asset('assets/admin/js/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/daterangepicker.min.js') }}"></script>
 @endpush
 
 @push('script')
-    <script src="{{ asset('assets/admin/js/vendor/datepicker.min.js') }}"></script>
-    <script src="{{ asset('assets/admin/js/vendor/datepicker.en.js') }}"></script>
     <script>
         (function($) {
             "use strict";
+            
+            $('.datepicker-here').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                timePicker: true,
+                timePicker24Hour: false,
+                autoUpdateInput: true,
+                locale: {
+                    format: 'YYYY-MM-DD hh:mm A'
+                }
+            });
+
+            $('.datepicker-here').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD hh:mm A'));
+            });
+
             $('[name=amount_mode]').on('change', function() {
                 if ($(this).val() == 2) {
                     $('.amount-pot').removeClass('d-none');
