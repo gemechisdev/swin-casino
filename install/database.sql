@@ -1690,142 +1690,144 @@ ALTER TABLE `games`
 -- Ethiopian Lottery System (AddisWin)
 -- --------------------------------------------------------
 
-CREATE TABLE \lottery_campaigns\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \
-ame\ varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  \image\ varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  \description\ text COLLATE utf8mb4_unicode_ci,
-  \	icket_price\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \max_tickets_per_user\ int(11) NOT NULL DEFAULT '0',
-  \	otal_ticket_limit\ int(11) NOT NULL DEFAULT '0',
-  \serial_length\ int(11) NOT NULL DEFAULT '10',
-  \draw_mode\ tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: From Sold, 2: From Space',
-  \uto_next_phase\ tinyint(4) NOT NULL DEFAULT '1',
-  \phase_duration_days\ int(11) NOT NULL DEFAULT '7',
-  \house_edge\ decimal(5,2) NOT NULL DEFAULT '10.00',
-  \status\ tinyint(4) NOT NULL DEFAULT '1',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\)
+CREATE TABLE `lottery_campaigns` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `ticket_price` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `max_tickets_per_user` int(11) NOT NULL DEFAULT '0',
+  `total_ticket_limit` int(11) NOT NULL DEFAULT '0',
+  `serial_length` int(11) NOT NULL DEFAULT '10',
+  `draw_mode` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: From Sold, 2: From Space',
+  `auto_next_phase` tinyint(4) NOT NULL DEFAULT '1',
+  `phase_duration_days` int(11) NOT NULL DEFAULT '7',
+  `house_edge` decimal(5,2) NOT NULL DEFAULT '10.00',
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_phases\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_campaign_id\ bigint(20) UNSIGNED NOT NULL,
-  \phase_number\ int(11) NOT NULL,
-  \sale_start_at\ datetime NOT NULL,
-  \sale_end_at\ datetime NOT NULL,
-  \draw_at\ datetime NOT NULL,
-  \drawn_at\ datetime DEFAULT NULL,
-  \	ickets_sold\ int(11) NOT NULL DEFAULT '0',
-  \	otal_revenue\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \prize_pool\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \house_cut\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \status\ tinyint(4) NOT NULL DEFAULT '0',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_phases_lottery_campaign_id_foreign\ (\lottery_campaign_id\),
-  CONSTRAINT \lottery_phases_lottery_campaign_id_foreign\ FOREIGN KEY (\lottery_campaign_id\) REFERENCES \lottery_campaigns\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_phases` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_campaign_id` bigint(20) UNSIGNED NOT NULL,
+  `phase_number` int(11) NOT NULL,
+  `sale_start_at` datetime NOT NULL,
+  `sale_end_at` datetime NOT NULL,
+  `draw_at` datetime NOT NULL,
+  `drawn_at` datetime DEFAULT NULL,
+  `tickets_sold` int(11) NOT NULL DEFAULT '0',
+  `total_revenue` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `prize_pool` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `house_cut` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_phases_lottery_campaign_id_foreign` (`lottery_campaign_id`),
+  CONSTRAINT `lottery_phases_lottery_campaign_id_foreign` FOREIGN KEY (`lottery_campaign_id`) REFERENCES `lottery_campaigns` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_prize_tiers\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_phase_id\ bigint(20) UNSIGNED NOT NULL,
-  \prize_title\ varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  \prize_type\ tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: Cash, 2: Physical',
-  \mount_mode\ tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: Fixed, 2: Pot Share',
-  \prize_amount\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \pot_percent\ decimal(5,2) NOT NULL DEFAULT '0.00',
-  \winner_count\ int(11) NOT NULL DEFAULT '1',
-  \description\ text COLLATE utf8mb4_unicode_ci,
-  \sort_order\ int(11) NOT NULL DEFAULT '1',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_prize_tiers_lottery_phase_id_foreign\ (\lottery_phase_id\),
-  CONSTRAINT \lottery_prize_tiers_lottery_phase_id_foreign\ FOREIGN KEY (\lottery_phase_id\) REFERENCES \lottery_phases\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_prize_tiers` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_phase_id` bigint(20) UNSIGNED NOT NULL,
+  `prize_title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `prize_type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: Cash, 2: Physical',
+  `amount_mode` tinyint(4) NOT NULL DEFAULT '1' COMMENT '1: Fixed, 2: Pot Share',
+  `prize_amount` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `pot_percent` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `winner_count` int(11) NOT NULL DEFAULT '1',
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `sort_order` int(11) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_prize_tiers_lottery_phase_id_foreign` (`lottery_phase_id`),
+  CONSTRAINT `lottery_prize_tiers_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_tickets\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_campaign_id\ bigint(20) UNSIGNED NOT NULL,
-  \lottery_phase_id\ bigint(20) UNSIGNED NOT NULL,
-  \user_id\ bigint(20) UNSIGNED NOT NULL,
-  \serial\ varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  \purchase_price\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \status\ tinyint(4) NOT NULL DEFAULT '1',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_tickets_lottery_campaign_id_foreign\ (\lottery_campaign_id\),
-  KEY \lottery_tickets_lottery_phase_id_foreign\ (\lottery_phase_id\),
-  KEY \lottery_tickets_user_id_foreign\ (\user_id\),
-  CONSTRAINT \lottery_tickets_lottery_campaign_id_foreign\ FOREIGN KEY (\lottery_campaign_id\) REFERENCES \lottery_campaigns\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_tickets_lottery_phase_id_foreign\ FOREIGN KEY (\lottery_phase_id\) REFERENCES \lottery_phases\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_tickets_user_id_foreign\ FOREIGN KEY (\user_id\) REFERENCES \users\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_tickets` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_campaign_id` bigint(20) UNSIGNED NOT NULL,
+  `lottery_phase_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `serial` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `purchase_price` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `status` tinyint(4) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_tickets_lottery_campaign_id_foreign` (`lottery_campaign_id`),
+  KEY `lottery_tickets_lottery_phase_id_foreign` (`lottery_phase_id`),
+  KEY `lottery_tickets_user_id_foreign` (`user_id`),
+  CONSTRAINT `lottery_tickets_lottery_campaign_id_foreign` FOREIGN KEY (`lottery_campaign_id`) REFERENCES `lottery_campaigns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_tickets_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_tickets_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_winners\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_phase_id\ bigint(20) UNSIGNED NOT NULL,
-  \lottery_ticket_id\ bigint(20) UNSIGNED NOT NULL,
-  \lottery_prize_tier_id\ bigint(20) UNSIGNED NOT NULL,
-  \user_id\ bigint(20) UNSIGNED NOT NULL,
-  \prize_type\ tinyint(4) NOT NULL DEFAULT '1',
-  \prize_amount\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \is_distributed\ tinyint(4) NOT NULL DEFAULT '0',
-  \distributed_at\ datetime DEFAULT NULL,
-  \delivery_status\ tinyint(4) DEFAULT NULL,
-  \dmin_note\ text COLLATE utf8mb4_unicode_ci,
-  \is_archived\ tinyint(4) NOT NULL DEFAULT '0',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_winners_lottery_phase_id_foreign\ (\lottery_phase_id\),
-  KEY \lottery_winners_lottery_ticket_id_foreign\ (\lottery_ticket_id\),
-  KEY \lottery_winners_lottery_prize_tier_id_foreign\ (\lottery_prize_tier_id\),
-  KEY \lottery_winners_user_id_foreign\ (\user_id\),
-  CONSTRAINT \lottery_winners_lottery_phase_id_foreign\ FOREIGN KEY (\lottery_phase_id\) REFERENCES \lottery_phases\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_winners_lottery_ticket_id_foreign\ FOREIGN KEY (\lottery_ticket_id\) REFERENCES \lottery_tickets\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_winners_lottery_prize_tier_id_foreign\ FOREIGN KEY (\lottery_prize_tier_id\) REFERENCES \lottery_prize_tiers\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_winners_user_id_foreign\ FOREIGN KEY (\user_id\) REFERENCES \users\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_winners` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_phase_id` bigint(20) UNSIGNED NOT NULL,
+  `lottery_ticket_id` bigint(20) UNSIGNED NOT NULL,
+  `lottery_prize_tier_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `prize_type` tinyint(4) NOT NULL DEFAULT '1',
+  `prize_amount` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `is_distributed` tinyint(4) NOT NULL DEFAULT '0',
+  `distributed_at` datetime DEFAULT NULL,
+  `delivery_status` tinyint(4) DEFAULT NULL,
+  `admin_note` text COLLATE utf8mb4_unicode_ci,
+  `is_archived` tinyint(4) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_winners_lottery_phase_id_foreign` (`lottery_phase_id`),
+  KEY `lottery_winners_lottery_ticket_id_foreign` (`lottery_ticket_id`),
+  KEY `lottery_winners_lottery_prize_tier_id_foreign` (`lottery_prize_tier_id`),
+  KEY `lottery_winners_user_id_foreign` (`user_id`),
+  CONSTRAINT `lottery_winners_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_winners_lottery_ticket_id_foreign` FOREIGN KEY (`lottery_ticket_id`) REFERENCES `lottery_tickets` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_winners_lottery_prize_tier_id_foreign` FOREIGN KEY (`lottery_prize_tier_id`) REFERENCES `lottery_prize_tiers` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_winners_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_draw_archives\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_phase_id\ bigint(20) UNSIGNED NOT NULL,
-  \draw_data\ longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
-  \drawn_at\ datetime NOT NULL,
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_draw_archives_lottery_phase_id_foreign\ (\lottery_phase_id\),
-  CONSTRAINT \lottery_draw_archives_lottery_phase_id_foreign\ FOREIGN KEY (\lottery_phase_id\) REFERENCES \lottery_phases\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_draw_archives` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_phase_id` bigint(20) UNSIGNED NOT NULL,
+  `draw_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `drawn_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_draw_archives_lottery_phase_id_foreign` (`lottery_phase_id`),
+  CONSTRAINT `lottery_draw_archives_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE \lottery_transactions\ (
-  \id\ bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  \lottery_phase_id\ bigint(20) UNSIGNED NOT NULL,
-  \lottery_ticket_id\ bigint(20) UNSIGNED DEFAULT NULL,
-  \user_id\ bigint(20) UNSIGNED NOT NULL,
-  \mount\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \post_balance\ decimal(28,8) NOT NULL DEFAULT '0.00000000',
-  \	rx\ varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-  \	ype\ tinyint(4) NOT NULL COMMENT '1: Purchase, 2: Refund, 3: Win',
-  \created_at\ timestamp NULL DEFAULT NULL,
-  \updated_at\ timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (\id\),
-  KEY \lottery_transactions_lottery_phase_id_foreign\ (\lottery_phase_id\),
-  KEY \lottery_transactions_user_id_foreign\ (\user_id\),
-  CONSTRAINT \lottery_transactions_lottery_phase_id_foreign\ FOREIGN KEY (\lottery_phase_id\) REFERENCES \lottery_phases\ (\id\) ON DELETE CASCADE,
-  CONSTRAINT \lottery_transactions_user_id_foreign\ FOREIGN KEY (\user_id\) REFERENCES \users\ (\id\) ON DELETE CASCADE
+CREATE TABLE `lottery_transactions` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `lottery_phase_id` bigint(20) UNSIGNED NOT NULL,
+  `lottery_ticket_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `amount` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `post_balance` decimal(28,8) NOT NULL DEFAULT '0.00000000',
+  `trx` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` tinyint(4) NOT NULL COMMENT '1: Purchase, 2: Refund, 3: Win',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lottery_transactions_lottery_phase_id_foreign` (`lottery_phase_id`),
+  KEY `lottery_transactions_user_id_foreign` (`user_id`),
+  CONSTRAINT `lottery_transactions_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_transactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 -- Lottery Cron Job
 -- --------------------------------------------------------
+
+INSERT INTO `cron_jobs` (`name`, `alias`, `action`, `url`, `cron_schedule_id`, `next_run`, `last_run`, `is_running`, `is_default`, `created_at`, `updated_at`) VALUES
+('Lottery Draw Engine', 'lottery_draw', '[\"App\\\\Http\\\\Controllers\\\\Admin\\\\LotteryCronController\", \"run\"]', NULL, 1, NOW(), NOW(), 1, 1, NOW(), NOW());
 
 INSERT INTO \cron_jobs\ (\
 ame\, \lias\, \ction\, \url\, \cron_schedule_id\, \
