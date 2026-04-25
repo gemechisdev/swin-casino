@@ -593,28 +593,137 @@ label.required:after {
   margin-left: 2px;
 }
 
-/* Dashboard info-card: 3-per-row on large screens, 2-per-row on all smaller */
-.info-card {
-  width: calc(33.333% - 16px);
+/* Dashboard info-card layout and design */
+.info-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
 }
 
-@media screen and (max-width: 1199px) {
+.info-card {
+  width: calc(33.333% - 16px);
+  background: hsla(270, 50%, 10%, 0.6);
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.info-card:hover {
+  background: hsla(270, 50%, 15%, 0.8);
+  border-color: hsla(var(--base), 0.5);
+  transform: translateY(-5px);
+}
+
+.info-card__icon {
+  width: 65px;
+  height: 65px;
+  min-width: 65px;
+  background: linear-gradient(135deg, hsl(38, 95%, 54%), hsl(20, 90%, 50%));
+  border-radius: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 32px;
+  color: #fff;
+  box-shadow: 0 10px 20px hsla(38, 95%, 54%, 0.3);
+}
+
+.info-card__content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.info-card__desc {
+  font-size: 14px;
+  color: hsla(0, 0%, 100%, 0.7);
+  font-weight: 500;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.info-card__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+@media screen and (max-width: 1399px) {
   .info-card {
-    width: calc(50% - 12px);
+    padding: 20px;
+  }
+  .info-card__icon {
+    width: 55px;
+    height: 55px;
+    min-width: 55px;
+    font-size: 24px;
+  }
+  .info-card__title {
+    font-size: 18px;
   }
 }
 
-/* Quick Actions: centered on desktop, 2-per-row on mobile */
-.quick-actions {
-  justify-content: center !important;
+@media screen and (max-width: 1199px) {
+  .info-wrapper {
+    gap: 15px;
+  }
+  .info-card {
+    width: calc(50% - 8px);
+  }
 }
 
-@media (max-width: 575px) {
+@media screen and (max-width: 767px) {
+  .info-card {
+    padding: 15px;
+    border-radius: 15px;
+  }
+}
+
+@media screen and (max-width: 575px) {
+  .info-card__icon {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    font-size: 20px;
+    border-radius: 12px;
+  }
+  .info-card__desc {
+    font-size: 11px;
+  }
+  .info-card__title {
+    font-size: 15px;
+  }
+  
   .quick-actions > a {
     flex: 1 1 calc(50% - 4px);
     text-align: center;
     justify-content: center;
     display: inline-flex;
     align-items: center;
+    font-size: 12px;
+    padding: 8px 5px;
   }
+}
+
+@media screen and (max-width: 375px) {
+  .info-card {
+    width: 100%;
+  }
+}
+
+/* Fix for ETB text wrapping */
+.info-card__title span {
+  font-size: 0.8em;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-left: 3px;
 }
