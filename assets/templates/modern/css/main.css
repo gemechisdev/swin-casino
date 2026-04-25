@@ -5585,3 +5585,284 @@ a.btn,
   position: relative;
   z-index: 1;
 }
+
+/* =============================================
+   GAME LAYOUT — headtail-body / animation frame
+   ============================================= */
+
+/* Left panel — the SVG frame lives here as .headtail-body__shape,
+   and the animation sits centered on top as .headtail-body__flip */
+.headtail-body {
+  position: relative;
+}
+
+.headtail-body__shape {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.headtail-body__shape svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Centre the animation INSIDE the SVG frame */
+.headtail-body__flip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headtail-body .coin-flipbox {
+  position: relative;
+}
+
+@media screen and (max-width: 1399px) {
+  .headtail-body .coin-flipbox {
+    height: 200px;
+    width: 200px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .headtail-body .coin-flipbox {
+    height: 240px;
+    width: 240px;
+  }
+}
+@media screen and (max-width: 767px) {
+  .headtail-body .coin-flipbox {
+    height: 190px;
+    width: 190px;
+  }
+}
+@media screen and (max-width: 575px) {
+  .headtail-body .coin-flipbox {
+    height: 150px;
+    width: 150px;
+  }
+  .headtail-body__shape {
+    display: none;
+  }
+  /* Fallback border when SVG is hidden */
+  .headtail-body {
+    min-height: 300px;
+    border: 2px solid var(--border-gold, hsl(38, 85%, 50%));
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
+@media screen and (max-width: 424px) {
+  .headtail-body .coin-flipbox {
+    height: 120px;
+    width: 120px;
+  }
+}
+
+.headtail-body .coin-flipbox__front,
+.headtail-body .coin-flipbox__back {
+  position: absolute;
+}
+
+.headtail-body .coin-flipbox__front img,
+.headtail-body .coin-flipbox__back img {
+  height: 100%;
+  width: 100%;
+}
+
+/* =============================================
+   GAME RIGHT PANEL — headtail-wrapper
+   ============================================= */
+.headtail-wrapper {
+  position: relative;
+  max-width: 605px;
+  padding: 60px 40px 45px;
+  margin-left: auto;
+  background: hsla(270, 50%, 10%, 0.85);
+  border: 1px solid hsla(38, 85%, 50%, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+}
+
+@media screen and (max-width: 1399px) {
+  .headtail-wrapper {
+    padding: 40px 40px 35px;
+  }
+}
+@media screen and (max-width: 1199px) {
+  .headtail-wrapper {
+    padding: 30px 20px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .headtail-wrapper {
+    padding: 80px 40px;
+    max-width: 100%;
+  }
+}
+@media screen and (max-width: 767px) {
+  .headtail-wrapper {
+    padding: 30px 20px;
+  }
+}
+@media screen and (max-width: 575px) {
+  .headtail-wrapper {
+    padding: 50px 30px;
+    border-top: 4px solid hsl(38, 95%, 54%);
+  }
+}
+
+/* =============================================
+   GAME CONTENT TITLE
+   ============================================= */
+.game-contet-title {
+  text-align: center;
+  margin-bottom: 24px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.game-contet-title .text {
+  background: linear-gradient(135deg, hsl(38, 95%, 54%), hsl(270, 80%, 65%));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.game-contet-title .text::selection {
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #fff;
+}
+
+/* =============================================
+   PLAY BUTTON WRAPPER
+   ============================================= */
+.game-playbtn {
+  max-width: 375px;
+  margin: 0 auto;
+}
+
+/* =============================================
+   HEAD/TAIL SELECTION BOXES
+   ============================================= */
+.headtail-slect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-block: 40px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 1199px) {
+  .headtail-slect {
+    gap: 16px;
+    margin-block: 20px;
+  }
+}
+@media screen and (max-width: 991px) {
+  .headtail-slect {
+    margin-block: 50px;
+  }
+}
+@media screen and (max-width: 767px) {
+  .headtail-slect {
+    margin-block: 30px;
+  }
+}
+
+.headtail-slect__box {
+  width: 175px;
+  height: 165px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid hsla(38, 85%, 50%, 0.2);
+  background: hsla(270, 60%, 12%, 0.6);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+@media screen and (max-width: 1399px) {
+  .headtail-slect__box { width: 160px; height: 150px; }
+}
+@media screen and (max-width: 1199px) {
+  .headtail-slect__box { width: 140px; height: 130px; }
+}
+@media screen and (max-width: 991px) {
+  .headtail-slect__box { width: 195px; height: 185px; }
+}
+@media screen and (max-width: 767px) {
+  .headtail-slect__box { width: 150px; height: 140px; }
+}
+@media screen and (max-width: 424px) {
+  .headtail-slect__box { width: 108px; height: 100px; }
+}
+
+.headtail-slect__image img {
+  width: 120px;
+}
+@media screen and (max-width: 1399px) {
+  .headtail-slect__image img { width: 100px; }
+}
+@media screen and (max-width: 1199px) {
+  .headtail-slect__image img { width: 90px; }
+}
+@media screen and (max-width: 991px) {
+  .headtail-slect__image img { width: 125px; }
+}
+@media screen and (max-width: 767px) {
+  .headtail-slect__image img { width: 100px; }
+}
+@media screen and (max-width: 424px) {
+  .headtail-slect__image img { width: 70px; }
+}
+
+/* =============================================
+   GAME SELECT BOX (active highlight state)
+   ============================================= */
+.game-select-box {
+  border: 2px solid transparent;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.game-select-box::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: hsla(0, 0%, 0%, 0.4);
+  overflow: hidden;
+  border-radius: inherit;
+  visibility: hidden;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  transition: opacity 0.2s;
+}
+
+.game-select-box.active {
+  border-color: hsl(38, 95%, 54%);
+  box-shadow: 0 0 18px hsla(38, 95%, 54%, 0.4);
+}
+
+.game-select-box.active::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Small input note */
+@media screen and (max-width: 1199px) {
+  .input-inner-note {
+    font-size: 12px;
+  }
+}
