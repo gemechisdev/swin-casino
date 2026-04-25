@@ -952,8 +952,12 @@ INSERT INTO `pages` (`id`, `name`, `slug`, `tempname`, `secs`, `seo_content`, `i
 (20, 'Games', 'games', 'templates.basic.', '[\"why_choose_us\"]', NULL, 1, '2022-08-24 09:26:42', '2025-04-23 00:46:59'),
 (21, 'HOME', '/', 'templates.sunfyre.', '[\"game\",\"why_choose_us\",\"trx_win\",\"testimonial\",\"how_work\",\"faq\",\"blog\",\"cta\"]', NULL, 1, '2020-07-11 10:23:58', '2024-01-02 10:27:35'),
 (22, 'About', 'about', 'templates.sunfyre.', '[\"about\",\"how_work\",\"testimonial\",\"referral\",\"faq\"]', NULL, 0, '2023-12-27 09:46:30', '2023-12-27 09:47:00'),
-(23, 'Game', 'game', 'templates.sunfyre.', NULL, NULL, 1, '2023-12-27 09:47:34', '2023-12-27 09:47:34'),
-(24, 'Blog', 'blog', 'templates.sunfyre.', NULL, NULL, 1, '2024-01-02 10:29:47', '2024-01-02 11:57:04');
+(23, 'Game', 'games', 'templates.sunfyre.', NULL, NULL, 1, '2023-12-27 09:47:34', '2023-12-27 09:47:34'),
+(24, 'Blog', 'blog', 'templates.sunfyre.', NULL, NULL, 1, '2024-01-02 10:29:47', '2024-01-02 11:57:04'),
+(25, 'HOME', '/', 'templates.modern.', '["game","why_choose_us","trx_win","testimonial","how_work","faq","blog","cta"]', NULL, 1, '2020-07-11 10:23:58', '2024-01-02 10:27:35'),
+(26, 'About', 'about', 'templates.modern.', '["about","how_work","testimonial","referral","faq"]', NULL, 0, '2023-12-27 09:46:30', '2023-12-27 09:47:00'),
+(27, 'Game', 'games', 'templates.modern.', NULL, NULL, 1, '2023-12-27 09:47:34', '2023-12-27 09:47:34'),
+(28, 'Blog', 'blog', 'templates.modern.', NULL, NULL, 1, '2024-01-02 10:29:47', '2024-01-02 11:57:04');
 
 -- --------------------------------------------------------
 
