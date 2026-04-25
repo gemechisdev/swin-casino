@@ -1,0 +1,223 @@
+/* ================================= Lottery Card Styles =========================== */
+.lottery-card {
+    background: var(--surface-gradient, #2d1b4e);
+    border: 3px solid var(--border-gold, #ffb800);
+    border-radius: var(--radius-xl, 24px);
+    padding: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-card, 0 8px 16px rgba(0, 0, 0, 0.4));
+}
+
+.lottery-card:hover {
+    border-color: #ffd700;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 184, 0, 0.3);
+}
+
+.lottery-card__thumb {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--radius-md, 12px);
+    overflow: hidden;
+    margin-bottom: 15px;
+    background: #0d0621;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.lottery-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.lottery-card:hover .lottery-card__thumb img {
+    transform: scale(1.1);
+}
+
+.lottery-card__content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.lottery-card__title {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.lottery-card__details {
+    margin-bottom: 20px;
+}
+
+.lottery-card__detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lottery-card__detail:last-child {
+    border-bottom: none;
+}
+
+.lottery-card__detail .label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lottery-card__detail .value {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.lottery-card__btn {
+    margin-top: auto;
+}
+
+.lottery-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(180deg, #ffde00 0%, #ff8c00 100%);
+    color: #4a0080;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    border: 2px solid #fff;
+    text-transform: uppercase;
+}
+
+.lottery-header h2 {
+    color: hsl(var(--base)) !important;
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.lottery-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ================================= Show Page Styles =========================== */
+.lottery-details-thumb img {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.lottery-info-list .border-bottom {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.lottery-info-list span {
+    font-size: 1rem;
+}
+
+/* Custom Input Group for Tickets */
+.input-group .form-control#ticket-qty {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--border-gold, #ffb800);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.4rem;
+    text-align: center;
+    border-radius: 12px 0 0 12px;
+}
+
+.input-group .form-control#ticket-qty:focus {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 184, 0, 0.4);
+}
+
+.input-group-text.bg--base {
+    background: var(--btn-gradient, linear-gradient(180deg, #ffde00 0%, #ff8c00 100%)) !important;
+    color: #4a0080 !important;
+    font-weight: 800;
+    border: 2px solid #ffd700;
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    padding: 0 20px !important;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    width: auto !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+#total-price {
+    font-size: 1.1rem;
+    margin-left: 8px;
+}
+
+/* Table Header Styles */
+.custom--table thead th {
+    background-color: var(--card-bg, rgba(255, 255, 255, 0.1)) !important;
+    color: var(--border-gold, #ffb800) !important;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+    border: none;
+    padding: 15px;
+}
+
+.custom--table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+/* Winner List Enhancements */
+.winner-item {
+    transition: background 0.3s;
+}
+
+.winner-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.winner-thumb img {
+    border: 2px solid hsl(var(--base));
+    padding: 2px;
+}
+
+/* Instruction Section */
+.instruction-content {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+}
+
+.instruction-content h1, .instruction-content h2, .instruction-content h3 {
+    color: #fff;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.instruction-content ul, .instruction-content ol {
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.instruction-content li {
+    margin-bottom: 10px;
+}
