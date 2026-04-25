@@ -8,9 +8,9 @@
                     <h5 class="card-title mb-0">{{ __($campaign->name) }} - @lang('Phase') #{{ $phase->phase_number }}</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row g-4">
                         <div class="col-md-5">
-                            <div class="lottery-details-thumb mb-4">
+                            <div class="lottery-details-thumb">
                                 <img src="{{ getImage(getFilePath('lottery') . '/' . $campaign->image, getFileSize('lottery')) }}" alt="image" class="w-100 rounded">
                             </div>
                         </div>
@@ -37,15 +37,20 @@
                             <form action="{{ route('user.lottery.buy', $phase->id) }}" method="POST" class="mt-4">
                                 @csrf
                                 <div class="form-group mb-3">
-                                    <label class="text-white">@lang('Number of Tickets')</label>
+                                    <label class="text-white mb-2">@lang('Number of Tickets')</label>
                                     <div class="input-group">
                                         <input type="number" name="quantity" value="1" min="1" max="100" class="form-control h-45" id="ticket-qty" required>
-                                        <span class="input-group-text bg--base text-white border-0">@lang('Total'): <span id="total-price">{{ showAmount($campaign->ticket_price) }}</span></span>
+                                        <span class="input-group-text bg--base">@lang('Total'): <span id="total-price">{{ showAmount($campaign->ticket_price) }}</span></span>
                                     </div>
-                                    <small class="text-muted">@lang('Available Balance'): {{ showAmount(auth()->user()->balance) }}</small>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <small class="text-muted">@lang('Available Balance'): {{ showAmount(auth()->user()->balance) }}</small>
+                                        <small class="text-muted">@lang('Max per User'): {{ $campaign->max_tickets_per_user ?: __('Unlimited') }}</small>
+                                    </div>
                                 </div>
                                 @if($phase->status == Status::LOTTERY_PHASE_ACTIVE)
-                                    <button type="submit" class="btn btn--base w-100 h-45">@lang('Purchase Tickets')</button>
+                                    <button type="submit" class="btn btn--base w-100 h-45">
+                                        <i class="las la-ticket-alt"></i> @lang('Buy Ticket')
+                                    </button>
                                 @else
                                     <button class="btn btn--secondary w-100 h-45" disabled>@lang('Sales Closed')</button>
                                 @endif
@@ -53,13 +58,22 @@
                         </div>
                     </div>
 
+                    @if($campaign->description)
+                        <div class="mt-5">
+                            <h5 class="text--base mb-3"><i class="las la-info-circle"></i> @lang('Game Instructions')</h5>
+                            <div class="instruction-content text-white">
+                                @php echo $campaign->description @endphp
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="mt-5">
-                        <h5 class="text-white mb-3">@lang('Prize Tiers')</h5>
-                        <div class="table-responsive--sm">
+                        <h5 class="text--base mb-3"><i class="las la-trophy"></i> @lang('Prize Tiers')</h5>
+                        <div class="table-responsive">
                             <table class="table custom--table">
                                 <thead>
                                     <tr>
-                                        <th>@lang('Rank')</th>
+                                        <th>@lang('Rank / Title')</th>
                                         <th>@lang('Winners')</th>
                                         <th>@lang('Prize')</th>
                                     </tr>
@@ -90,7 +104,7 @@
         </div>
 
         <div class="col-xl-4">
-            <div class="card custom--card h-100">
+            <div class="card custom--card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">@lang('Recent Winners')</h5>
                 </div>
@@ -115,6 +129,7 @@
                             </div>
                         @empty
                             <div class="text-center p-5">
+                                <i class="las la-trophy la-3x text-muted mb-2"></i>
                                 <p class="text-muted mb-0">@lang('No winners yet.')</p>
                             </div>
                         @endforelse
@@ -124,6 +139,10 @@
         </div>
     </div>
 @endsection
+
+@push('style')
+    <link rel="stylesheet" href="{{ asset(activeTemplate(true) . 'css/lottery.css') }}">
+@endpush
 
 @push('script')
     <script>

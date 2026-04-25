@@ -12,7 +12,7 @@
                 $phase = $lottery->phases->first();
             @endphp
             <div class="col-xl-4 col-md-6">
-                <div class="lottery-card">
+                <div class="lottery-card h-100" onclick="window.location='{{ route('user.lottery.show', $lottery->id) }}'" style="cursor: pointer;">
                     <div class="lottery-card__thumb">
                         <img src="{{ getImage(getFilePath('lottery') . '/' . $lottery->image, getFileSize('lottery')) }}" alt="image">
                         @if($phase)
@@ -38,11 +38,11 @@
                             @endif
                         </div>
 
-                        <div class="lottery-card__btn">
+                        <div class="lottery-card__btn mt-auto">
                             @if($phase)
-                                <a href="{{ route('user.lottery.show', $lottery->id) }}" class="btn btn--base w-100">
-                                    <i class="las la-play"></i> @lang('Play Now')
-                                </a>
+                                <button class="btn btn--base w-100">
+                                    <i class="las la-ticket-alt"></i> @lang('Buy Ticket')
+                                </button>
                             @else
                                 <button class="btn btn--secondary w-100" disabled>
                                     <i class="las la-ban"></i> @lang('Coming Soon')

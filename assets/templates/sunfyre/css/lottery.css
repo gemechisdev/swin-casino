@@ -114,3 +114,98 @@
     max-width: 600px;
     margin: 0 auto;
 }
+
+/* ================================= Show Page Styles =========================== */
+.lottery-details-thumb img {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.lottery-info-list .border-bottom {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.lottery-info-list span {
+    font-size: 1rem;
+}
+
+/* Custom Input Group for Tickets */
+.input-group .form-control#ticket-qty {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.input-group .form-control#ticket-qty:focus {
+    border-color: hsl(var(--base));
+    box-shadow: none;
+}
+
+.input-group-text.bg--base {
+    background: linear-gradient(135deg, hsl(var(--base)), hsl(var(--base-two))) !important;
+    color: hsl(var(--dark)) !important;
+    font-weight: 800;
+    border: none;
+    min-width: 150px;
+    justify-content: center;
+}
+
+#total-price {
+    font-size: 1.1rem;
+    margin-left: 5px;
+}
+
+/* Table Header Styles */
+.custom--table thead th {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: hsl(var(--base)) !important;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: none;
+    padding: 15px;
+}
+
+.custom--table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+/* Winner List Enhancements */
+.winner-item {
+    transition: background 0.3s;
+}
+
+.winner-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.winner-thumb img {
+    border: 2px solid hsl(var(--base));
+    padding: 2px;
+}
+
+/* Instruction Section */
+.instruction-content {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+}
+
+.instruction-content h1, .instruction-content h2, .instruction-content h3 {
+    color: #fff;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.instruction-content ul, .instruction-content ol {
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+.instruction-content li {
+    margin-bottom: 10px;
+}

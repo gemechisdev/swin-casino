@@ -88,7 +88,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>@lang('Description')</label>
-                                <textarea name="description" rows="5" class="form-control">{{ old('description', @$campaign->description) }}</textarea>
+                                <textarea name="description" rows="5" class="form-control nicEdit">{{ old('description', @$campaign->description) }}</textarea>
                             </div>
                         </div>
                     </div>
