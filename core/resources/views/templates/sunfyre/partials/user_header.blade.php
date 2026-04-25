@@ -14,6 +14,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('user.home') }}">@lang('Dashboard')</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.game.list') }}">@lang('Games')</a>
+                    </li>
                     <li class="nav-item menu_has_children">
                         <a href="#" class="nav-link">@lang('Lottery')</a>
                         <ul class="sub-menu">
