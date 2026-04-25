@@ -618,3 +618,119 @@ label.required:after {
     align-items: center;
   }
 }
+
+/* ================================= Lottery Game Card Improvements =========================== */
+.game-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    border-color: hsl(var(--base) / 0.5);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px hsl(var(--base) / 0.2);
+}
+
+.game-card__thumb {
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+    position: relative;
+    aspect-ratio: 16/10;
+}
+
+.game-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.game-card:hover .game-card__thumb img {
+    transform: scale(1.1);
+}
+
+.game-card__content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-card__title {
+    font-size: 1.25rem !important;
+    margin-bottom: 12px;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.lottery-details-list {
+    margin-bottom: 20px;
+}
+
+.lottery-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lottery-detail-item:last-child {
+    border-bottom: none;
+}
+
+.lottery-detail-item .label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lottery-detail-item .value {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.lottery-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lottery-badge--prize {
+    background: linear-gradient(135deg, hsl(var(--base)), hsl(var(--base-two)));
+    color: hsl(var(--dark));
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.lottery-badge--countdown {
+    position: relative;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: monospace;
+}
