@@ -149,19 +149,22 @@
     color: hsl(var(--dark)) !important;
     font-weight: 800;
     border: none;
-    min-width: 150px;
+    padding: 0 25px;
     justify-content: center;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 #total-price {
     font-size: 1.1rem;
-    margin-left: 5px;
+    margin-left: 8px;
 }
 
 /* Table Header Styles */
 .custom--table thead th {
     background-color: rgba(255, 255, 255, 0.05) !important;
-    color: hsl(var(--base)) !important;
+    color: #fff !important;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 1px;

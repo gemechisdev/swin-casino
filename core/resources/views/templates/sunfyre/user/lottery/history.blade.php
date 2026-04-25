@@ -57,3 +57,7 @@
         @endif
     </div>
 @endsection
+
+@push('style')
+    <link rel="stylesheet" href="{{ asset(activeTemplate(true) . 'css/lottery.css') }}">
+@endpush

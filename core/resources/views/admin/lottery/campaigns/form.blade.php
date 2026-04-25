@@ -8,7 +8,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>@lang('Image')</label>
-                                <x-image-uploader class="w-100" type="lottery" :imagePath="isset($campaign) ? getImage(getFilePath('lottery') . '/' . $campaign->image, getFileSize('lottery')) : ''" />
+                                <x-image-uploader class="w-100" type="lottery" :imagePath="isset($campaign) ? getImage(getFilePath('lottery') . '/' . $campaign->image, getFileSize('lottery')) : ''" :required="!isset($campaign)" />
                             </div>
                         </div>
                         <div class="col-md-8">
