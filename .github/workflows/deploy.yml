@@ -322,6 +322,7 @@ jobs:
             # Theme custom CSS (edited via admin panel)
             --exclude='assets/templates/basic/css/custom.css'
             --exclude='assets/templates/sunfyre/css/custom.css'
+            --exclude='assets/templates/modern/css/custom.css'
           )
 
           # Determine if we should deploy the installer folder.
