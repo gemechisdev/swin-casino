@@ -21,7 +21,7 @@
                             </span>
                         @endif
                     </div>
-                    <div class="lottery-card__content">
+                    <div class="game-card__content lottery-card__content">
                         <h4 class="lottery-card__title">{{ __($lottery->name) }}</h4>
                         
                         <div class="lottery-card__details">
@@ -69,6 +69,10 @@
         </div>
     @endif
 @endsection
+
+@push('style')
+    <link rel="stylesheet" href="{{ asset(activeTemplate(true) . 'css/lottery.css') }}">
+@endpush
 
 @push('script')
     <script>
