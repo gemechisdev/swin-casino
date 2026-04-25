@@ -1817,8 +1817,10 @@ CREATE TABLE `lottery_transactions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lottery_transactions_lottery_phase_id_foreign` (`lottery_phase_id`),
+  KEY `lottery_transactions_lottery_ticket_id_foreign` (`lottery_ticket_id`),
   KEY `lottery_transactions_user_id_foreign` (`user_id`),
   CONSTRAINT `lottery_transactions_lottery_phase_id_foreign` FOREIGN KEY (`lottery_phase_id`) REFERENCES `lottery_phases` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lottery_transactions_lottery_ticket_id_foreign` FOREIGN KEY (`lottery_ticket_id`) REFERENCES `lottery_tickets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lottery_transactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1827,10 +1829,4 @@ CREATE TABLE `lottery_transactions` (
 -- --------------------------------------------------------
 
 INSERT INTO `cron_jobs` (`name`, `alias`, `action`, `url`, `cron_schedule_id`, `next_run`, `last_run`, `is_running`, `is_default`, `created_at`, `updated_at`) VALUES
-('Lottery Draw Engine', 'lottery_draw', '[\"App\\\\Http\\\\Controllers\\\\Admin\\\\LotteryCronController\", \"run\"]', NULL, 1, NOW(), NOW(), 1, 1, NOW(), NOW());
-
-INSERT INTO \cron_jobs\ (\
-ame\, \lias\, \ction\, \url\, \cron_schedule_id\, \
-ext_run\, \last_run\, \is_running\, \is_default\, \created_at\, \updated_at\) VALUES
-('Lottery Draw Engine', 'lottery_draw', '["App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Admin\\\\\\\\LotteryCronController", "run"]', NULL, 1, NOW(), NOW(), 1, 1, NOW(), NOW());
-
+('Lottery Draw Engine', 'lottery_draw', '["App\\\\Http\\\\Controllers\\\\Admin\\\\LotteryCronController", "run"]', NULL, 1, NOW(), NOW(), 1, 1, NOW(), NOW());
