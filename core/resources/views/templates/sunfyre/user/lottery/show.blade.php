@@ -40,7 +40,9 @@
                                     <label class="text-white mb-2">@lang('Number of Tickets')</label>
                                     <div class="input-group">
                                         <input type="number" name="quantity" value="1" min="1" max="100" class="form-control h-45" id="ticket-qty" required>
-                                        <span class="input-group-text bg--base">@lang('Total'): <span id="total-price">{{ showAmount($campaign->ticket_price) }}</span></span>
+                                        <span class="input-group-text bg--base">
+                                            @lang('Total'): <span id="total-price" class="ms-1">{{ showAmount($campaign->ticket_price) }}</span>
+                                        </span>
                                     </div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <small class="text-muted">@lang('Available Balance'): {{ showAmount(auth()->user()->balance) }}</small>
