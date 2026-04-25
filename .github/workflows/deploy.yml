@@ -210,7 +210,7 @@ jobs:
         run: |
           set -euo pipefail
           # Check for .env file existence
-          STATE=$(ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "[ -f ${{ secrets.APP_PATH }}/core/.env ] && echo 'exists' || echo 'missing'")
+          STATE=$(ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "[ -f \"${{ secrets.APP_PATH }}/core/.env\" ] && echo 'exists' || echo 'missing'")
           if [ "$STATE" = "exists" ]; then
             echo "has_env=true" >> "$GITHUB_OUTPUT"
             echo "✓ .env file found on remote server."
@@ -348,7 +348,6 @@ jobs:
           echo "▶ Primary rsync (application files)…"
           rsync -rlptz \
             --delete \
-            --delete-excluded \
             --human-readable \
             --stats \
             -e "$SSH_CMD" \
