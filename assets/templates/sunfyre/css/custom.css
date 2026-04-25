@@ -619,65 +619,65 @@ label.required:after {
   }
 }
 
-/* ================================= Lottery Game Card Improvements =========================== */
-.game-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
+/* ================================= Lottery Card Styles =========================== */
+.lottery-card {
+    background: hsl(var(--black));
+    border: 1px solid hsl(var(--white) / 0.1);
+    border-radius: 15px;
     padding: 15px;
-    transition: all 0.3s ease;
     height: 100%;
-    position: relative;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
 }
 
-.game-card:hover {
-    transform: translateY(-10px);
+.lottery-card:hover {
     border-color: hsl(var(--base) / 0.5);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px hsl(var(--base) / 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-.game-card__thumb {
-    border-radius: 15px;
+.lottery-card__thumb {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
     overflow: hidden;
     margin-bottom: 15px;
-    position: relative;
-    aspect-ratio: 16/10;
+    background: #000;
 }
 
-.game-card__thumb img {
+.lottery-card__thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
 }
 
-.game-card:hover .game-card__thumb img {
+.lottery-card:hover .lottery-card__thumb img {
     transform: scale(1.1);
 }
 
-.game-card__content {
+.lottery-card__content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
-.game-card__title {
-    font-size: 1.25rem !important;
-    margin-bottom: 12px;
+.lottery-card__title {
+    font-size: 1.4rem;
     color: #fff;
-    font-weight: 600;
-    line-height: 1.4;
+    margin-bottom: 15px;
+    font-weight: 700;
+    line-height: 1.3;
 }
 
-.lottery-details-list {
+.lottery-card__details {
     margin-bottom: 20px;
 }
 
-.lottery-detail-item {
+.lottery-card__detail {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -685,11 +685,11 @@ label.required:after {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.lottery-detail-item:last-child {
+.lottery-card__detail:last-child {
     border-bottom: none;
 }
 
-.lottery-detail-item .label {
+.lottery-card__detail .label {
     color: rgba(255, 255, 255, 0.6);
     font-size: 0.9rem;
     display: flex;
@@ -697,40 +697,41 @@ label.required:after {
     gap: 8px;
 }
 
-.lottery-detail-item .value {
+.lottery-card__detail .value {
     color: #fff;
     font-weight: 600;
     font-size: 0.95rem;
 }
 
+.lottery-card__btn {
+    margin-top: auto;
+}
+
 .lottery-badge {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 6px 14px;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, hsl(var(--base)), hsl(var(--base-two)));
+    color: hsl(var(--dark));
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 700;
     z-index: 2;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.lottery-badge--prize {
-    background: linear-gradient(135deg, hsl(var(--base)), hsl(var(--base-two)));
-    color: hsl(var(--dark));
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.lottery-badge--countdown {
-    position: relative;
-    top: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: monospace;
+.lottery-header h2 {
+    color: hsl(var(--base)) !important;
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.lottery-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
