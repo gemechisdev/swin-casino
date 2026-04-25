@@ -345,16 +345,26 @@ jobs:
             EXCLUDES+=(--exclude='install/')
           fi
 
-          echo "▶ Primary rsync (application files)…"
+          echo "▶ Primary rsync (application files — SAFE mode)…"
+          # We REMOVED --delete to ensure user uploads and runtime files 
+          # (like assets/images/lottery/) are never deleted from the server.
           rsync -rlptz \
-            --delete \
             --human-readable \
             --stats \
             -e "$SSH_CMD" \
             "${EXCLUDES[@]}" \
             ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/
 
-          echo "✓ Primary rsync complete."
+          echo "▶ Vendor rsync (dependency cleanup)…"
+          # We use --delete ONLY for the vendor folder to ensure 
+          # code dependencies strictly match the composer.lock file.
+          rsync -rlptz \
+            --delete \
+            --human-readable \
+            -e "$SSH_CMD" \
+            core/vendor/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.APP_PATH }}/core/vendor/
+
+          echo "✓ Synchronization complete."
 
       # ── RSYNC — ASSET DEPLOYMENT (Safe Seed) ─────────────────
       # We use --ignore-existing to ensure we NEVER overwrite files
